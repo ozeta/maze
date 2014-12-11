@@ -11,26 +11,31 @@
 #include "./headers/pathfind.h"
 #include "./headers/structures.h"
 
+#define NORTH(y) y - 1
+#define SOUTH(y) y + 1
+#define EAST(y) y + 1
+#define WEST(y) y - 1
+
 Set *getAdjList ( struct gObj *graph, int u ) {
 	Set *Adj = NULL;
 	int x = u % graph->width;
 	int y = u / graph->width;
 	int neighbor;
 
-	if ( y - 1 > 0 && graph->maze[y - 1][x] != 9 ) {
-		neighbor = graph->width * ( y - 1 ) + ( x );
+	if ( NORTH(y) > 0 && graph->maze[NORTH(y)][x] != 9 ) {
+		neighbor = graph->width * ( NORTH(y) ) + ( x );
 		Adj = enqueue ( Adj, setInt ( neighbor ) );
 	}
-	if ( x + 1 < graph->width && graph->maze[y][x + 1] != 9  ) {
-		neighbor = graph->width * ( y ) + ( x + 1 );		
+	if ( EAST(x) < graph->width && graph->maze[y][EAST(x)] != 9  ) {
+		neighbor = graph->width * ( y ) + ( EAST(x) );		
 		Adj = enqueue ( Adj, setInt ( neighbor ) );
 	}
-	if ( y + 1 < graph->height && graph->maze[y+1][x] != 9 ) {
-		neighbor = graph->width * ( y + 1 ) + ( x );		
+	if ( SOUTH(y) < graph->height && graph->maze[SOUTH(y)][x] != 9 ) {
+		neighbor = graph->width * ( SOUTH(y) ) + ( x );		
 		Adj = enqueue ( Adj, setInt ( neighbor ) );
 	}
-	if ( x - 1 > 0 && graph->maze[y][x - 1] != 9 ) {
-		neighbor = graph->width * ( y ) + ( x - 1 );		
+	if ( WEST(x) > 0 && graph->maze[y][WEST(x)] != 9 ) {
+		neighbor = graph->width * ( y ) + ( WEST(x) );		
 		Adj = enqueue ( Adj, setInt ( neighbor ) );
 	}
 

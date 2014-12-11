@@ -6,7 +6,7 @@
 #include <time.h>
 #include "./headers/functions.h"
 #include "./headers/lib.h"
-#define NORTH(y) y - 1
+
 
 GRAPHOBJ *initializeGraph ( BDEF build, IEDEF insertEdge, WDEF getWeight, 
 								VINS insertVertex, TDEF transpose, ADEF getAdjList ) {
