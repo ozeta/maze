@@ -17,7 +17,7 @@ void printSet ( Set *set, FILE *stream ) {
 	if ( set ) {
 		Set* curr = set;
 		while ( curr ) {
-			fprintf (stream, "%d, ", getInt ( curr->data ) );
+			fprintf (stream, "%d\n", getInt ( curr->data ) );
 			curr = curr->next;
 		}
 	} else {

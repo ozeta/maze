@@ -21,6 +21,7 @@ int main () {
 
 	VCOORD start;
 	VCOORD target;
+	VCOORD target1;
 	graph->maze = buildMap ( graph, mazeStr );
 
 	for ( i = 0; i < graph->height; i++ ) {
@@ -49,5 +50,8 @@ int main () {
 	
 	//minPath ( graph, (69*1)+1, (69*27)+67 );
 	minPath ( graph, coordToID ( graph, &start ) , coordToID( graph, &target ) );
+	//target1.x = 50;
+	//target1.y = 25;
+	//minPath ( graph, coordToID ( graph, &start ) , coordToID( graph, &target1 ) );
 	return 0;
 }

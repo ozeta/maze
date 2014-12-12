@@ -89,7 +89,7 @@ VCOORD **buildMap ( GRAPHOBJ * graph, char *mazeStr ) {
 
 		maze[col][row].k = k;
 		maze[col][row].ID = i;
-
+		maze[col][row].path = false;
 		
 		i++;
 		++graph->vNum;
