@@ -22,19 +22,19 @@ Set *getAdjList ( struct gObj *graph, int u ) {
 	int y = u / graph->width;
 	int neighbor;
 
-	if ( NORTH(y) > 0 && graph->maze[NORTH(y)][x] != 9 ) {
+	if ( NORTH(y) > 0 && graph->maze[NORTH(y)][x].k != 9 ) {
 		neighbor = graph->width * ( NORTH(y) ) + ( x );
 		Adj = enqueue ( Adj, setInt ( neighbor ) );
 	}
-	if ( EAST(x) < graph->width && graph->maze[y][EAST(x)] != 9  ) {
+	if ( EAST(x) < graph->width && graph->maze[y][EAST(x)].k != 9  ) {
 		neighbor = graph->width * ( y ) + ( EAST(x) );		
 		Adj = enqueue ( Adj, setInt ( neighbor ) );
 	}
-	if ( SOUTH(y) < graph->height && graph->maze[SOUTH(y)][x] != 9 ) {
+	if ( SOUTH(y) < graph->height && graph->maze[SOUTH(y)][x].k != 9 ) {
 		neighbor = graph->width * ( SOUTH(y) ) + ( x );		
 		Adj = enqueue ( Adj, setInt ( neighbor ) );
 	}
-	if ( WEST(x) > 0 && graph->maze[y][WEST(x)] != 9 ) {
+	if ( WEST(x) > 0 && graph->maze[y][WEST(x)].k != 9 ) {
 		neighbor = graph->width * ( y ) + ( WEST(x) );		
 		Adj = enqueue ( Adj, setInt ( neighbor ) );
 	}
@@ -45,7 +45,7 @@ Set *getAdjList ( struct gObj *graph, int u ) {
  * visita breadth_first_search su matrice di adiacenza
 */
 
-int *breadth_first_search ( GRAPHOBJ *graph, int s ) {
+int *breadth_first_search ( GRAPHOBJ *graph, int s, int target ) {
 
 	if ( !check ( graph, "breadth_first_search" ) ) return NULL;
 	if ( s >= graph->vNum ) {
@@ -82,6 +82,9 @@ int *breadth_first_search ( GRAPHOBJ *graph, int s ) {
 				pred[v] = u;
 				frontier = enqueue ( frontier, setInt ( v ) );
 			}
+			if ( v == target ) {
+				return pred;
+			}
 		}
 		frontier = dequeue ( frontier );
 		colore[u] = NERO;
@@ -91,16 +94,19 @@ int *breadth_first_search ( GRAPHOBJ *graph, int s ) {
 /**
 stampa del cammino minimo
 */
-void printPath ( GRAPHOBJ *graph, int s , int v, int *pred ) {
+Set *printPath ( GRAPHOBJ *graph, int s , int v, int *pred, Set *succ ) {
 
     if (v == s) {
  		printf ( "s: %d\n", s  );
+ 		succ = enqueue ( succ, setInt ( s ) );
     } else if ( pred[v] == NIL ) {
 		printf ( "\n--non esiste cammino tra s e v--\n");
     } else {
-		printPath (graph, s, pred[v], pred );
 		printf ( "v: %d\n", v );
+		succ = enqueue ( succ, setInt ( v ) );
+		printPath (graph, s, pred[v], pred, succ );
     }
+    return succ;
 }
 /**
 cammino minimo
@@ -108,28 +114,42 @@ cammino minimo
 void minPath ( GRAPHOBJ *graph, int s, int v ) {
 
 	int 		*	pred 	= NULL;
+	Set 		*	succ 	= NULL;
+	Set 		*	def 	= NULL;
 	int y = 2;
 	int x = 4;
-
-	pred = breadth_first_search ( graph, s );
-	printPath ( graph, s, v, pred );
+	pred = breadth_first_search ( graph, s, v );
+	succ = printPath ( graph, s, v, pred, succ );
 	int i,j;
-	/*
-	for ( i = 0; i < graph->vNum; i++ ) {
-		printf ( "pred[%4d] = %d\n", i, pred[i] );
-	}
+	int k = 0;
+/*
+	k = getInt ( getTail ( succ ) );
+	!isEmpty ( succ );
 */
 
+	while ( !isEmpty ( succ ) ) {
+		k = getInt ( getFront ( succ ) );
+		def = push ( setInt ( k ) );
+		succ = dequeue ( succ );
+	}
+
+	k = NIL;
+	k = getInt ( top ( def ) );
+	def = pop ( def );
+
+	FILE *stream = openStream ( "succ.txt", "w+" );
+	printSet ( succ, stream );
 	for ( i = 0; i < graph->height; i++ ) {
 		for ( j = 0; j < graph->width; j++ ) {
 			
 			if ( pred[i*69+j] != NIL ) {
-				printf (ANSI_COLOR_BLUE"%d"ANSI_COLOR_RESET, graph->maze[i][j]);
+				printf (ANSI_COLOR_BLUE"%d"ANSI_COLOR_RESET, graph->maze[i][j].k);
 			} else {
-				printf ("%d", graph->maze[i][j]);
+				printf ("%d", graph->maze[i][j].k);
 			}
 		}
 	printf ( "\n" );
 	}	
+	closeStream ( stream );
 	free ( pred );
 }

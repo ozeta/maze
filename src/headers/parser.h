@@ -30,7 +30,7 @@ int arco ( GRAPHOBJ *graph, STRING * str, int ID, int vertexNum );
 
 /*MAZE*/
 char *checkResizeArray ( char *buffer, int i, int *size );
-char *mazeToString ( char *stream, int *width, int *height );
+char *mazeToString ( GRAPHOBJ *graph, char *stream );
 
 
 #endif

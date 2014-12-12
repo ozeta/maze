@@ -310,13 +310,12 @@ int parsePeso ( STRING * str ) {
 }
 
 
-char *mazeToString ( char *stream, int *width, int *height ) {
+char *mazeToString ( GRAPHOBJ *graph, char *stream ) {
 
 	char 		c 			= '\0';
 	int 		size 		= 40000;
 	int 		i 			= 0;
-	*width 					= 0;
-	*height 				= 0;
+
 	char *		buffer 		= ( char * ) malloc ( size * sizeof ( char ) );
 	FILE * 		pFile 		= openStream ( stream, "r" );
 	memset ( buffer, '\0', size );
@@ -329,10 +328,10 @@ char *mazeToString ( char *stream, int *width, int *height ) {
 	while ( c != EOF ) {
 		buffer = checkResizeArray ( buffer, i, &size );
 		if ( c == '\n' ) {
-			if ( *width == 0 ) {
-				*width = i;
+			if ( graph->width == 0 ) {
+				graph->width = i;
 			}
-			*height = *height + 1;
+			graph->height = graph->height + 1;
 			c = fgetc ( pFile );
 		}
 		buffer[i] = c;
@@ -341,7 +340,7 @@ char *mazeToString ( char *stream, int *width, int *height ) {
 		c = fgetc ( pFile );
 	}
 	closeStream ( pFile );
-	printf ("altezza: %d, larghezza: %d\n", *height, *width );
+	printf ("altezza: %d, larghezza: %d\n", graph->height, graph->width );
 
 	return buffer;
 }

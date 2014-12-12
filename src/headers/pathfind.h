@@ -12,7 +12,7 @@
 =======================*/
 
 Set *getAdjList ( struct gObj *graph, int u );
-int 	*	breadth_first_search ( GRAPHOBJ *graph, int s );
-void 		printPath ( GRAPHOBJ *graph, int s , int v, int *pred );
+int 	*	breadth_first_search ( GRAPHOBJ *graph, int s, int target );
+Set 	*	printPath ( GRAPHOBJ *graph, int s , int v, int *pred, Set *succ );
 void 		minPath ( GRAPHOBJ *graph, int s, int v );
 #endif

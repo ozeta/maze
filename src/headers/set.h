@@ -21,7 +21,7 @@ typedef struct SET {
 bool 		intSearch ( Set *set, int data );
 void 	*	setInt ( int i );
 int 		getInt ( void *i );
-void printSet ( Set *set, FILE *stream );
+void 		printSet ( Set *set, FILE *stream );
 void 		stampaIntSet ( Set *st, printDEF print, FILE *stream );
 Set 	*	enqueue ( Set *queue, void *data );
 Set 	*	dequeue ( Set *queue );
@@ -33,4 +33,5 @@ Set 	*	pop ( Set *stack );
 int 		isEmpty ( Set *queue );
 void 		clearSet ( Set *set );
 void 	*	setCoord ( int x, int y );
+void 	*	getTail ( Set *queue );
 #endif

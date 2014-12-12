@@ -43,6 +43,7 @@ typedef struct {
 	int x;
 	int y;
 	int k;
+	int ID;
 	bool path;
 } VCOORD;
 
@@ -59,7 +60,7 @@ typedef struct gObj {
 	//numero vertici
 	int 			vNum;
 
-	int 	**		maze;	
+	VCOORD 	**		maze;	
 	int 			width;
 	int 			height;
 

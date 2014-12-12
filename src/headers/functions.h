@@ -22,6 +22,6 @@ GRAPHOBJ *initializeGraph ( BDEF build, IEDEF insertEdge, WDEF getWeight,
  */
 VCOORD *getCoord ( GRAPHOBJ *graph, int u );
 int coordToID ( GRAPHOBJ *graph, VCOORD *c );
-int **buildMap ( GRAPHOBJ * graph, char *mazeStr );
+VCOORD **buildMap ( GRAPHOBJ * graph, char *mazeStr );
 
 #endif

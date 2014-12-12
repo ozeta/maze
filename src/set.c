@@ -97,22 +97,6 @@ Set *enqueue (Set *queue, void *data) {
 	return queue;
 
 }
-/**
- * accoda in tempo costante
-Set *enqueue ( Set *queue , void *data ) {
-	if ( queue == NULL ) {
-		queue = newSet ( data );
-		queue->last = queue; 
-	} else {
-
-		Set *last 	= queue->last;
-		last->next 	= newSet ( data );
-		queue->last = last->next;
-	}
-	return queue;
-
-}
- */
 
 /**rimuove il primo elemento della coda
 restituisce NULL se la coda e' vuota
@@ -135,6 +119,22 @@ void *getFront ( Set *queue ) {
 		return NULL;
 }
 
+void *getTail ( Set *queue ) { 
+	if ( !queue ) {
+		return NULL;
+	}
+	Set *prev = queue;
+	Set *cur = queue->next;
+	while ( cur ) {
+		prev = cur;
+		cur = cur->next;
+	}
+
+	prev->next = NULL;
+	void *res = prev->data;
+	free ( cur );
+	return res;
+}
 
 /******************************************************************************
 

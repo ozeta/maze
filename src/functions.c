@@ -17,6 +17,7 @@ GRAPHOBJ *initializeGraph ( BDEF build, IEDEF insertEdge, WDEF getWeight,
 
 		graph->matrix 			= NULL;
 		graph->list 			= NULL;
+		graph->maze 			= NULL;
 		graph->vNum 			= 0;
 		graph->width 			= 0;
 		graph->height 			= 0;
@@ -42,21 +43,29 @@ VCOORD *getCoord ( GRAPHOBJ *graph, int u ) {
 }
 
 int coordToID ( GRAPHOBJ *graph, VCOORD *c ) {
-	return ( graph->width ) * ( c->y ) + ( c->x );
+	int res = ( graph->width ) * ( c->y ) + ( c->x );
+	//printf ( "graph->width:%4d, c->y:%4d, c->x:%4d, res:%4d\n", graph->width, c->y, c->x, res );
+	return res;
 }
 
 
-int **buildMap ( GRAPHOBJ * graph, char *mazeStr ) {
+VCOORD **buildMap ( GRAPHOBJ * graph, char *mazeStr ) {
 
 	int width 		= graph->width;
 	int height 		= graph->height;
 	int size 		= width * height;
-	int **maze 		= ( int ** ) malloc ( height * sizeof ( int * ) );
-	int i = 0;
+	VCOORD **maze 		= ( VCOORD ** ) malloc ( height * sizeof ( VCOORD * ) );
+	if ( maze == NULL ) {
+		printf ("errore maze **\n");
+		exit ( -1 );
+	}
+	int i;
 	for ( i = 0; i < height; i++ ) {
-		maze[i] = ( int * ) malloc ( width * sizeof ( int * ) );
+		maze[i] = ( VCOORD * ) malloc ( width * sizeof ( VCOORD ) );
 		if ( maze[i] == NULL ) {
-			printf ("errore malloc");
+			printf ( "width %d\n", graph->width );
+			printf ( "errore maze * %d\n", i );
+			exit ( -1 );
 		}
 	}
 	int row;
@@ -78,7 +87,8 @@ int **buildMap ( GRAPHOBJ * graph, char *mazeStr ) {
 			k = 3;
 		}
 
-		maze[col][row] = k;
+		maze[col][row].k = k;
+		maze[col][row].ID = i;
 
 		
 		i++;

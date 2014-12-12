@@ -11,44 +11,43 @@
 
 int main () {
 
-	int width, height;
 	char *mazeStr;
 	GRAPHOBJ * graph;
 	graph = initializeGraph ( NULL, NULL, NULL, NULL, NULL, getAdjList );
-	mazeStr = mazeToString ( "./maps/implicit1.txt", &width, &height );
-	graph->width = width;
-	graph->height = height;
+	mazeStr = mazeToString ( graph, "./maps/implicit1.txt" );
+
 	int i, j;
 	//printf ( "%s", mazeStr );
 
 	VCOORD start;
 	VCOORD target;
-	int **maze = buildMap ( graph, mazeStr );
-	graph->maze = maze;
-	
-	for ( i = 0; i < height; i++ ) {
-		for ( j = 0; j < width; j++ ) {
+	graph->maze = buildMap ( graph, mazeStr );
+
+	for ( i = 0; i < graph->height; i++ ) {
+		for ( j = 0; j < graph->width; j++ ) {
 			
-			if ( maze[i][j] == 2 ) {
-				start.x = i;
-				start.y = j;
-				printf (ANSI_COLOR_RED"%d"ANSI_COLOR_RESET, graph->maze[i][j]);
-			} else if ( maze[i][j] == 3 ) {
-				target.x = i;
-				target.y = j;
-				printf (ANSI_COLOR_RED"%d"ANSI_COLOR_RESET, graph->maze[i][j]);
+			if ( graph->maze[i][j].k == 2 ) {
+				start.x = j;
+				start.y = i;
+				printf (ANSI_COLOR_RED"%d"ANSI_COLOR_RESET, graph->maze[i][j].k);
+			} else if ( graph->maze[i][j].k == 3 ) {
+				target.x = j;
+				target.y = i;
+				printf (ANSI_COLOR_RED"%d"ANSI_COLOR_RESET, graph->maze[i][j].k);
 
 			} else {
-				printf ("%d", maze[i][j]);
+				printf ("%d", graph->maze[i][j].k);
 			}
 		}
 	printf ( "\n" );
 	}
 	printf ( "start: (%d, %d)\n", start.x, start.y );
+	coordToID ( graph, &start );
 	printf ( "target: (%d, %d)\n", target.x, target.y );
+	coordToID( graph, &target );
 	printf ( "\n" );
 	
-	minPath ( graph, (69*1)+1, (69*27)+67 );
-	//minPath ( graph, coordToID ( graph, &start ) , coordToID( graph, &target ) );
+	//minPath ( graph, (69*1)+1, (69*27)+67 );
+	minPath ( graph, coordToID ( graph, &start ) , coordToID( graph, &target ) );
 	return 0;
 }
