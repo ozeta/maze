@@ -104,6 +104,11 @@ void insert ( Heap *H, Data *data ) {
 		}
 	}
 	H->A[H->heapsize] = data;
+
+	int f = father ( H->heapsize );
+	if ( f >= 1) {
+		H->heapify ( H, f );	
+	}
 	H->heapsize++;
 }
 
@@ -304,7 +309,7 @@ bool isHeapEmpty ( Heap *H ) {
 
 bool heapIntSearch ( Heap *H , int test ) {
 
-	int size = H->heapsize -1;
+	int size = H->heapsize ;
 	bool result = false;
 	while ( size > 0 && !result ) {
 		if ( test == * ( int * ) H->A[size]->data ) {

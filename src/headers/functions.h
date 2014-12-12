@@ -11,7 +11,7 @@ funzioni generiche
 
 =======================*/
 GRAPHOBJ *initializeGraph ( BDEF build, IEDEF insertEdge, WDEF getWeight, 
-	VINS insertVertex, TDEF transpose, ADEF getAdjList );
+	VINS insertVertex, TDEF transpose, ADEF getAdjList, PATH path );
 
 /**
  * MAZE

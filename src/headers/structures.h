@@ -6,8 +6,8 @@
 #define BIANCO 		0
 #define GRIGIO 		1
 #define	NERO 		2
-#define INFINITE 	100000
-#define NIL			-100000
+#define INFINITE 	1000000
+#define NIL			-1000000
 
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_GREEN   "\x1b[32m"
@@ -72,6 +72,7 @@ typedef struct gObj {
 	
 	int 			( *getWeight )		( struct gObj *, int, int );
 	int 			( *transpose ) 		( struct gObj *graph );
+	int 		* 	( *path)			( struct gObj *, int , int );
 } GRAPHOBJ;
 
 
@@ -95,10 +96,10 @@ typedef int				( *insDEF )		( int, int );
 typedef int				( *compDEF )	( void *, void * );
 typedef int 			( *WDEF )		( struct gObj *, int, int );
 typedef int 			( *TDEF ) 		( GRAPHOBJ *graph );
-typedef struct gObj * 	( *BDEF) 		( struct gObj *, int );
+typedef GRAPHOBJ *		( *BDEF) 		( struct gObj *, int );
 typedef void 			( *IEDEF ) 		( struct gObj *, int , int , int  );
 typedef void 			( *VINS ) 		( struct gObj *graph );
 typedef Set *			( *ADEF )		( GRAPHOBJ *graph, int u );
-
+typedef int	* 			( *PATH)		( struct gObj *, int , int );
 
 #endif

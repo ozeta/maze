@@ -1,57 +1,127 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <time.h>
 #include "./src/headers/structures.h"
 #include "./src/headers/menu.h"
 #include "./src/headers/parser.h"
 #include "./src/headers/functions.h"
 #include "./src/headers/pathfind.h"
 
+bool CLOCKT = false;
+void bfs ( GRAPHOBJ *graph, VCOORD *start, VCOORD *target) {
+	clock_t start_t, end_t, total_t;
+	start_t = clock();
 
-int main () {
+	graph->path = breadth_first_search;
+	minPath ( graph, coordToID ( graph, start ) , coordToID( graph, target ) );
 
-	char *mazeStr;
-	GRAPHOBJ * graph;
-	graph = initializeGraph ( NULL, NULL, NULL, NULL, NULL, getAdjList );
-	mazeStr = mazeToString ( graph, "./maps/implicit1.txt" );
+	if ( CLOCKT ) {
+		end_t = clock();
+		printf("End of the big loop, end_t = %ld\n", end_t);
+	  	total_t = (double)(end_t - start_t) / CLOCKS_PER_SEC;
+		printf("Total time taken by CPU: %f\n", ( double ) total_t  );	
+		printf ( "\n" );
+	}
+	printf ( "\n" );
 
+}
+void dijkstra ( GRAPHOBJ *graph, VCOORD *start, VCOORD *target) {
+	clock_t start_t, end_t, total_t;
+
+	graph->path = dijkstraHeap;
+	start_t = clock();
+
+	minPath ( graph, coordToID ( graph, start ) , coordToID( graph, target ) );
+
+	if ( CLOCKT ) {
+		end_t = clock();
+		printf("End of the big loop, end_t = %ld\n", end_t);
+		total_t = (double)(end_t - start_t) / CLOCKS_PER_SEC;
+		printf("Total time taken by CPU: %f\n", ( double ) total_t  );	
+		printf ( "\n" );
+	}
+	printf ( "\n" );
+
+}
+void intializePaths ( GRAPHOBJ *graph, VCOORD *start, VCOORD *target ) {
 	int i, j;
-	//printf ( "%s", mazeStr );
-
-	VCOORD start;
-	VCOORD target;
-	VCOORD target1;
-	graph->maze = buildMap ( graph, mazeStr );
+	bool DEBUG = false;
 
 	for ( i = 0; i < graph->height; i++ ) {
 		for ( j = 0; j < graph->width; j++ ) {
 			
 			if ( graph->maze[i][j].k == 2 ) {
-				start.x = j;
-				start.y = i;
-				printf (ANSI_COLOR_RED"%d"ANSI_COLOR_RESET, graph->maze[i][j].k);
+				start->x = j;
+				start->y = i;
+				if ( DEBUG ) {	
+					printf (ANSI_COLOR_RED"%d"ANSI_COLOR_RESET, graph->maze[i][j].k);
+				}
 			} else if ( graph->maze[i][j].k == 3 ) {
-				target.x = j;
-				target.y = i;
-				printf (ANSI_COLOR_RED"%d"ANSI_COLOR_RESET, graph->maze[i][j].k);
-
+				target->x = j;
+				target->y = i;
+				if ( DEBUG ) {	
+					printf (ANSI_COLOR_RED"%d"ANSI_COLOR_RESET, graph->maze[i][j].k);
+				}
 			} else {
-				printf ("%d", graph->maze[i][j].k);
+				if ( DEBUG ) {
+					printf ("%d", graph->maze[i][j].k);
+				}
 			}
 		}
-	printf ( "\n" );
+		if ( DEBUG ) {		
+			printf ( "\n" );
+		}
 	}
-	printf ( "start: (%d, %d)\n", start.x, start.y );
-	coordToID ( graph, &start );
-	printf ( "target: (%d, %d)\n", target.x, target.y );
-	coordToID( graph, &target );
-	printf ( "\n" );
+}
+int main ( int argc, char **argv ) {
+
+	int l = 0;
+	char *str[] = {	"./maps/implicit0.txt",
+					"./maps/implicit1.txt",
+					"./maps/implicit2.txt",
+					"./maps/implicit3.txt",
+					"./maps/implicit4.txt",
+					"./maps/implicit5.txt",
+					"./maps/implicit6.txt" };
+	if ( argc == 2 ) {
+		l = atoi(argv[1]);
+	}
+	clock_t start_t, end_t, total_t;
+	char *mazeStr;
+	GRAPHOBJ * graph;
+	graph = initializeGraph ( NULL, NULL, getMatrixWeight, NULL, NULL, getAdjList, NULL );
+	mazeStr = mazeToString ( graph, str[l] );
+
+	int i, j;
+	//printf ( "%s", mazeStr );
+
+	VCOORD start;
+	start.x = start.y = -1;
+	VCOORD target;
+	target.x = target.y = -1;
 	
-	//minPath ( graph, (69*1)+1, (69*27)+67 );
-	minPath ( graph, coordToID ( graph, &start ) , coordToID( graph, &target ) );
-	//target1.x = 50;
-	//target1.y = 25;
-	//minPath ( graph, coordToID ( graph, &start ) , coordToID( graph, &target1 ) );
+	graph->maze = buildMap ( graph, mazeStr );
+
+
+	intializePaths ( graph, &start, &target );		
+	
+	VCOORD target1;
+	target1.x = 50;
+	target1.y = 25;
+	VCOORD target2;
+	target2.x = start.x + 5;
+	target2.y = start.y;
+
+	
+		printf ( "start: (%d, %d)\n", start.x, start.y );
+		coordToID ( graph, &start );
+		printf ( "target: (%d, %d)\n", target.x, target.y );
+		coordToID( graph, &target );
+		printf ( "\n" );
+	
+	//bfs ( graph, &start, &target);
+	dijkstra ( graph, &start, &target);
+
 	return 0;
 }

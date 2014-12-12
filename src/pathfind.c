@@ -16,6 +16,43 @@
 #define EAST(y) y + 1
 #define WEST(y) y - 1
 
+void predPrint ( GRAPHOBJ *graph, int *pred, char *str ) {
+	int i;
+	FILE *stream = openStream ( str, "w+" );
+	for (i = 0; i < graph->vNum; ++i) {
+		fprintf ( stream, "pred[%4d]= %4d\n", i, pred[i] );
+	}
+	closeStream ( stream );
+}
+
+void printAdj ( GRAPHOBJ *graph, int u, Set *Adj, FILE *stream ) {
+	char *s ="-------------------";
+	if ( Adj ) {
+		fprintf ( stream, "nodo %3d:\n", u );
+		fprintf ( stream, "Adiacenze:\n" );
+		printSet ( Adj, stream );
+		fprintf ( stream, "\n%s%s%s\n", s, s, s );
+	} else {
+		fprintf ( stream, "nessuna adiacenza\n" );
+	}
+}
+void printDist ( GRAPHOBJ *graph, FILE *stream, int *dist ) {
+	fprintf ( stream, "distanze:\n\n");
+	int k;
+	for ( k = 0; k < graph->vNum; k++ ) {
+		fprintf ( stream, " [%d]->%d, ", k, dist[k]);
+	}
+	fprintf ( stream, "\n\n" );	
+}
+int getMatrixWeight ( GRAPHOBJ *graph, int x, int y ) {
+	int weight = 0;
+
+	if ( graph && graph->matrix ) {
+		weight = graph->matrix[x][y].weight;
+	}
+	return weight;
+}
+
 Set *getAdjList ( struct gObj *graph, int u ) {
 	Set *Adj = NULL;
 	int x = u % graph->width;
@@ -44,11 +81,14 @@ Set *getAdjList ( struct gObj *graph, int u ) {
 /**
  * visita breadth_first_search su matrice di adiacenza
 */
-void dijkstraHeap ( GRAPHOBJ *graph, int s, int *prev ) {
+int *dijkstraHeap ( GRAPHOBJ *graph, int s, int target ) {
 
 	Heap 	*		Q 			= NULL;
 	Set 	*		AdjList 	= NULL;
 	Data 	*		tmp;
+	int 	*		pred;
+
+
 	int DEBUG = 0;
 	FILE *stream;
 	Q = initializeHeap ( minHeapify );
@@ -56,68 +96,63 @@ void dijkstraHeap ( GRAPHOBJ *graph, int s, int *prev ) {
 	int v 	= 0;
 	int u 	= 0;
 	int alt = 0;
+	pred 	= ( int *) malloc ( graph->vNum * sizeof ( int ) );
 	int colore[graph->vNum];
 	int dist[graph->vNum];
 
 	//initializations
 	for ( v = 0; v < graph->vNum; v++ ) {
 		dist[v] 	= INFINITE;
-		prev[v] 	= NIL;
+		pred[v] 	= NIL;
 		colore[v] 	= BIANCO;
-		if ( s != v )
-			insert ( Q, new_HeapData ( v, INFINITE ) );
+		//if ( s != v )
+		//	insert ( Q, new_HeapData ( v, INFINITE ) );
 	}
 	dist[s] = 0;
-	prev[s] = s;
+	pred[s] = s;
 	insert ( Q, new_HeapData ( s, 0 ) );
 
 	char path[50];
 	buildHeap ( Q );
-	if ( DEBUG ) {
-		sprintf (path, "dijkstra_%c.txt", 'a' + s); 
-		stream = openStream ( path, "w+" );	
-		fprintf ( stream, "from %c\n\n", 'a' + s );
-		Hprint ( Q, stream );
-	}
 
 	//main loop
 	while ( Q->heapsize > 1 ) {
 		//remove and return the best vertex
-		
 		tmp 	= extractFirst ( Q );
 		u 		= getData ( tmp );
 		dist[u] = getKey ( tmp );
 		colore[u] = NERO;
 		AdjList = graph->getAdjList ( graph, u );
-		if ( DEBUG ) {
-			fprintf ( stream, "nodo estratto: %3d\n", u );
-			Hprint ( Q, stream );
-			printDist ( graph, stream, dist );
-			printAdj ( graph, u, AdjList, stream );
-		}
+		//printf ( "%d ", u);
+		//graph->maze[getCoord ( graph, u )->y][getCoord ( graph, u )->x].path = true;
 		while ( !isEmpty ( AdjList ) ) {
 			v = getInt ( getFront ( AdjList ) );
+			
 			if ( colore[v] == BIANCO ) {
-				relax ( graph, Q, u, v, dist, prev );
+				insert ( Q, new_HeapData ( v, dist[u] ) );
+				relax ( graph, Q, u, v, dist, pred );
 			}
+
 			AdjList = dequeue ( AdjList );
 		}
-	}
-	if ( DEBUG ) {	
-		fprintf ( stream, "prev:\n\n" );
-		for (u = 0; u < graph->vNum; u++ ) {
-			fprintf ( stream, "[%d]->%d ", u, prev[u] );
+		if ( u == target ) {
+			printf ("\n---target: %4d(%3d,%d)---\n",u, (getCoord ( graph, u))->x, (getCoord ( graph, u ))->y);
+			//relax ( graph, Q, u, v, dist, pred );
+			//pred[u] = v;
+			predPrint ( graph, pred, "dijkstra.txt" );	
+			return pred;			
 		}
-		fprintf ( stream, "\n" );	
-		closeStream ( stream );
 	}
+
+	//predPrint ( graph, pred, "dijkstra.txt" );	
+	return pred;
 }
-void relax ( GRAPHOBJ *graph, Heap *Q, int u, int v, int *dist, int *prev) {
+void relax ( GRAPHOBJ *graph, Heap *Q, int u, int v, int *dist, int *pred) {
 	int alt;
 	alt = dist[u] + graph->getWeight ( graph, u, v );
 	if ( dist[v] > alt ) {
 		dist[v] = alt;
-		prev[v] = u;
+		pred[v] = u;
 		decreaseKey ( Q, v, alt ) ;
 	}
 }
@@ -160,12 +195,15 @@ int *breadth_first_search ( GRAPHOBJ *graph, int s, int target ) {
 				frontier = enqueue ( frontier, setInt ( v ) );
 			}
 			if ( v == target ) {
+
+				predPrint ( graph, pred, "bfs.txt" );
 				return pred;
 			}
 		}
 		frontier = dequeue ( frontier );
 		colore[u] = NERO;
 	}
+
 	return pred;
 }
 /**
@@ -191,6 +229,21 @@ Set *printPath ( GRAPHOBJ *graph, int s , int v, int *pred, Set *succ, FILE *str
 /**
 cammino minimo
 */
+void printAllpreds ( GRAPHOBJ *graph, int *pred ) {
+	int i,j;
+	for ( i = 0; i < graph->height; i++ ) {
+		for ( j = 0; j < graph->width; j++ ) {
+		
+			if ( pred[i*graph->width+j] != NIL ) {
+				printf (ANSI_COLOR_BLUE"%d"ANSI_COLOR_RESET, graph->maze[i][j].k);
+			} else {
+				printf ("%d", graph->maze[i][j].k);
+			}
+		}
+		printf ( "\n" );
+	}	
+	printf ( "\n" );
+}
 void minPath ( GRAPHOBJ *graph, int s, int v ) {
 
 	int 		*	pred 	= NULL;
@@ -198,16 +251,17 @@ void minPath ( GRAPHOBJ *graph, int s, int v ) {
 	Set 		*	def 	= NULL;
 	int y = 2;
 	int x = 4;
-	pred = breadth_first_search ( graph, s, v );
-	FILE *stream = openStream ( "prev.txt", "w+" );
+	pred = graph->path ( graph, s, v );
+
+	FILE *stream = openStream ( "pred.txt", "w+" );
 	succ = printPath ( graph, s, v, pred, succ, stream );
 	closeStream ( stream );
 	int i,j;
 	int k = 0;
-
+		//printAllpreds ( graph, pred );
 	//FILE *stream1 = openStream ( "def.txt", "w+" );
 	//printSet ( def, stream1 );
-	cPrintMaze ( graph, succ, s, v );
+		cPrintMaze ( graph, succ, s, v );
 	//closeStream ( stream1 );
 	free ( pred );
 
@@ -222,12 +276,14 @@ void cPrintMaze ( GRAPHOBJ *graph, Set * succ, int s, int v ) {
 		for ( j = 0; j < graph->width; j++ ) {
 			
 			//if ( i*69+j == k ) {
-			if ( i*69+j == s ||  i*69+j == v ) {
+			if ( i*graph->width+j == s ||  i*graph->width+j == v ) {
+			//if ( 0 ) {
+			//	printf ("--%d--",s);
 				printf (ANSI_COLOR_RED"%d"ANSI_COLOR_RESET, graph->maze[i][j].k);
 
 			} else 
+			//if ( 0 ) {
 			if ( graph->maze[i][j].path == true ) {
-			//if ( pred[i*69+j] != NIL ) {
 				printf (ANSI_COLOR_CYAN"%d"ANSI_COLOR_RESET, graph->maze[i][j].k);
 			} else {
 				printf ("%d", graph->maze[i][j].k);

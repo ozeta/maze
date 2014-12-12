@@ -9,7 +9,7 @@
 
 
 GRAPHOBJ *initializeGraph ( BDEF build, IEDEF insertEdge, WDEF getWeight, 
-								VINS insertVertex, TDEF transpose, ADEF getAdjList ) {
+								VINS insertVertex, TDEF transpose, ADEF getAdjList, PATH path ) {
 
 	GRAPHOBJ * 	graph = ( GRAPHOBJ * ) malloc ( sizeof ( GRAPHOBJ ) );
 
@@ -27,6 +27,7 @@ GRAPHOBJ *initializeGraph ( BDEF build, IEDEF insertEdge, WDEF getWeight,
 		graph->insertVertex 	= insertVertex;
 		graph->transpose 		= transpose;
 		graph->getAdjList		= getAdjList;
+		graph->path				= path;
 	}
 
 	return graph;
@@ -77,13 +78,15 @@ VCOORD **buildMap ( GRAPHOBJ * graph, char *mazeStr ) {
 		col = i / width;
 		if ( mazeStr[i] == '|' ) {
 			k = 9;
-		}else if ( mazeStr[i] == '-' ) {
+		} else if ( mazeStr[i] == '-' ) {
 			k = 9;
-		}else if ( mazeStr[i] == ' ' ) {
+		} else if ( mazeStr[i] == ' ' ) {
 			k = 1;
-		}else if ( mazeStr[i] == 's' ) {
+		} else if ( mazeStr[i] == 's' ) {
 			k = 2;
-		}else if ( mazeStr[i] == 'f' ) {
+		} else if ( mazeStr[i] == 't' ) {
+			k = 3;
+		} else if ( mazeStr[i] == 'f' ) {
 			k = 3;
 		}
 
@@ -94,6 +97,6 @@ VCOORD **buildMap ( GRAPHOBJ * graph, char *mazeStr ) {
 		i++;
 		++graph->vNum;
 	}
-	printf ("vert: %d\n\n", graph->vNum );
+	//printf ("vert: %d\n\n", graph->vNum );
 	return maze;
 }
