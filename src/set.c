@@ -200,3 +200,18 @@ void clearSet ( Set *set ) {
 	
 	while ( ( set = pop ( set ) ) != NULL );
 }
+
+Set *deleteFromSet ( Set * set, int input ) {
+
+    if ( set == NULL ) {
+
+    } else if ( getInt ( set->data ) == input ) {
+        Set *nodo = set->next;
+        free ( set );
+        set = nodo;
+    } else {
+        set->next = deleteFromSet ( set->next, input );
+    }
+
+    return set;
+}

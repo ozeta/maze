@@ -8,28 +8,12 @@
 #include "./src/headers/functions.h"
 #include "./src/headers/pathfind.h"
 
-bool CLOCKT = false;
-void bfs ( GRAPHOBJ *graph, VCOORD *start, VCOORD *target) {
-	clock_t start_t, end_t, total_t;
-	start_t = clock();
+bool CLOCKT = true;
 
-	graph->path = breadth_first_search;
-	minPath ( graph, coordToID ( graph, start ) , coordToID( graph, target ) );
-
-	if ( CLOCKT ) {
-		end_t = clock();
-		printf("End of the big loop, end_t = %ld\n", end_t);
-	  	total_t = (double)(end_t - start_t) / CLOCKS_PER_SEC;
-		printf("Total time taken by CPU: %f\n", ( double ) total_t  );	
-		printf ( "\n" );
-	}
-	printf ( "\n" );
-
-}
-void dijkstra ( GRAPHOBJ *graph, VCOORD *start, VCOORD *target) {
+void pathfind ( GRAPHOBJ *graph, VCOORD *start, VCOORD *target, PATH alg ) {
 	clock_t start_t, end_t, total_t;
 
-	graph->path = dijkstraHeap;
+	graph->path = alg;
 	start_t = clock();
 
 	minPath ( graph, coordToID ( graph, start ) , coordToID( graph, target ) );
@@ -83,7 +67,8 @@ int main ( int argc, char **argv ) {
 					"./maps/implicit3.txt",
 					"./maps/implicit4.txt",
 					"./maps/implicit5.txt",
-					"./maps/implicit6.txt" };
+					"./maps/implicit6.txt",
+					"./maps/implicit7.txt" };
 	if ( argc == 2 ) {
 		l = atoi(argv[1]);
 	}
@@ -114,14 +99,18 @@ int main ( int argc, char **argv ) {
 	target2.y = start.y;
 
 	
-		printf ( "start: (%d, %d)\n", start.x, start.y );
+		printf ( "start: %d (%d, %d)\n", 
+			coordToID ( graph, &start ), start.x, start.y );
 		coordToID ( graph, &start );
-		printf ( "target: (%d, %d)\n", target.x, target.y );
+		printf ( "target: %d (%d, %d)\n", 
+			coordToID ( graph, &target ), target.x, target.y );
 		coordToID( graph, &target );
 		printf ( "\n" );
 	
-	//bfs ( graph, &start, &target);
-	dijkstra ( graph, &start, &target);
+	//pathfind ( graph, &start, &target, breadth_first_search );
+	//pathfind ( graph, &start, &target, dijkstraHeap );
+	pathfind ( graph, &start, &target, a_star_bene );
+
 
 	return 0;
 }

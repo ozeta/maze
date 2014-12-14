@@ -26,4 +26,11 @@ int 	*	breadth_first_search ( GRAPHOBJ *graph, int s, int target );
  */
 int 	*	dijkstraHeap ( GRAPHOBJ *graph, int s, int target );
 void 		relax ( GRAPHOBJ *graph, Heap *Q, int u, int v, int *dist, int *prev);
+
+/**
+ * A STAR
+ */
+int heuristic ( GRAPHOBJ *graph, int s, int t );
+int *a_star ( GRAPHOBJ *graph, int s, int t );
+int *a_star_bene ( GRAPHOBJ *graph, int s, int t );
 #endif

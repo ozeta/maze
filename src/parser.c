@@ -84,35 +84,6 @@ int writeOnFile ( GRAPHOBJ *graph, char *stream ) {
 	return 1;
 }
 
-//TODO: NUMERI NEGATIVI
-int parseFile ( GRAPHOBJ *graph, char *stream ) {
-
-	STRING 	*	stringObj 	= ( STRING *) malloc ( sizeof ( STRING ) );
-
-	stringObj->string 		= fileToString ( stream );
-	stringObj->cur 			= 0;
-
-	if ( !check ( stringObj->string , "parseFile" ) ) {
-		return 0;
-	}
-
-	graph->vNum = num_nodi ( stringObj );
-	if ( graph->vNum == INT_MIN )
-		return 0;
-
-	//printf ("\nnumero vertici: %d\n", graph->vNum);
-	graph = graph->build ( graph, graph->vNum );
-
-	//TODO trasforma in bool <stdbool.h>
-	if ( graph->vNum != adiacenze ( graph, stringObj ) ) {
-		graph->matrix = NULL;
-		return 0;
-	}
-
-		
-	return 1;
-}
-
 int num_nodi ( STRING *str ) { 
 
 	while ( str->string[str->cur] == '\n' || 

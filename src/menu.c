@@ -31,7 +31,7 @@ void menuSwitch ( GRAPHOBJ *graph, int command, int maxsize ) {
 				//leggi da file
 				//printf ( "\nnome file:\n" );
 				//string = getString ( );
-				check = parseFile ( graph, "output.txt" );
+				//check = parseFile ( graph, "output.txt" );
 
 				break;
 			case 2:

@@ -58,6 +58,7 @@ void *getLast ( Heap *H );
 //estrae l'elemento minimo (o massimo) dal maxHeap
 Data * extractFirst ( Heap *H );
 //aumenta/diminuisce il valore nell'elemento i dello heap
+void updateKey ( Heap *H, int i, int value );
 void decreaseKey ( Heap *H, int i, int v ) ;
 void increaseKey ( Heap *H, int i, int v ) ;
 //scambia 2 oggetti

@@ -15,8 +15,6 @@ GRAPHOBJ *initializeGraph ( BDEF build, IEDEF insertEdge, WDEF getWeight,
 
 	if ( check ( graph, "initializeGraph" ) ) {
 
-		graph->matrix 			= NULL;
-		graph->list 			= NULL;
 		graph->maze 			= NULL;
 		graph->vNum 			= 0;
 		graph->width 			= 0;
@@ -79,6 +77,8 @@ VCOORD **buildMap ( GRAPHOBJ * graph, char *mazeStr ) {
 		if ( mazeStr[i] == '|' ) {
 			k = 9;
 		} else if ( mazeStr[i] == '-' ) {
+			k = 9;
+		} else if ( mazeStr[i] == '+' ) {
 			k = 9;
 		} else if ( mazeStr[i] == ' ' ) {
 			k = 1;

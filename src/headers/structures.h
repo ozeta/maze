@@ -17,6 +17,7 @@
 #define ANSI_COLOR_CYAN    "\x1b[36m"
 #define ANSI_COLOR_RESET   "\x1b[0m"
 
+/*
 typedef struct edgeType {
 
 	int	ID;
@@ -33,7 +34,7 @@ typedef struct vertex {
 	EDGE 			*	edge;
 
 } VERTEX;
-
+*/
 typedef struct GraphT_Struct {
 
 	int		weight;
@@ -49,14 +50,14 @@ typedef struct {
 
 typedef struct gObj {
 
+	/*
 	//puntatore a matrice di adiacenza
 	GraphT 	** 		matrix;
 	//puntatore a lista di adiacenza
-	/*
 	* e' stata scelta una rappresentazione di lista concatenata di vertici 
 	* per rendere inserimento e cancellazione in tempo lineare
-	*/
 	VERTEX 	* 		list;
+	*/
 	//numero vertici
 	int 			vNum;
 
@@ -75,7 +76,7 @@ typedef struct gObj {
 	int 		* 	( *path)			( struct gObj *, int , int );
 } GRAPHOBJ;
 
-
+/*
 typedef struct dfs_variables {
 
 	int 	*		d;
@@ -86,12 +87,7 @@ typedef struct dfs_variables {
 	Set 	* 		coda;
 } DFSVAR;
 
-typedef struct a_star_var {
-	Set *oSet;
-	Set *cSet;
-
-} ASVAR ;
-
+*/
 typedef int				( *insDEF )		( int, int );
 typedef int				( *compDEF )	( void *, void * );
 typedef int 			( *WDEF )		( struct gObj *, int, int );
