@@ -19,12 +19,19 @@ Run:
 where <num> goes from 0 to 7
 
 Files:
+
 \main.c // main program
+
 \maps // the maps used for testing
+
 \src\functions.c //general functions
+
 \src\heap.c //heap library
+
 \src\set.c //library for queues, stacks, etc
+
 \src\pathfind.c //library for the pathfinding algorythms
+
 \src\parser //library for map reading from file
 
 in \src\headers\structures there are all the structures used into the project
