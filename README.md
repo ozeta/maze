@@ -6,19 +6,19 @@
 
 Compile: 
 
-You can Just use the Makefile, i use 3 different configurations:
+You can Just use the Makefile into the project, i use 3 different configurations:
 
-#make (clang by default), #make g++, #make gcc
+# #make (clang by default), #make g++, #make gcc
 
 Dependencies: c math library
 
-Run:
+###Run ###
 
 ./labirinto <num>
 
 where <num> goes from 0 to 7
 
-Files:
+###Files###
 
 \main.c // main program
 
