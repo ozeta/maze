@@ -100,3 +100,108 @@ VCOORD **buildMap ( GRAPHOBJ * graph, char *mazeStr ) {
 	//printf ("vert: %d\n\n", graph->vNum );
 	return maze;
 }
+
+
+/**
+stampa del cammino minimo
+*/
+Set *printPath ( GRAPHOBJ *graph, int s , int v, int *pred, Set *succ, FILE *stream ) {
+
+    if (v == s) {
+ 		if ( stream )
+ 			fprintf ( stream, "s: %d\n", s  );
+ 		graph->maze[getCoord ( graph, s )->y][getCoord ( graph, s )->x].path = true;
+ 		succ = enqueue ( succ, setInt ( s ) );
+    } else if ( pred[v] == NIL ) {
+    	if ( stream )
+			fprintf ( stream, "\n--non esiste cammino tra s e v--\n");
+    } else {
+    	if ( stream )
+			fprintf ( stream, "v: %d\n", v );
+		succ = enqueue ( succ, setInt ( v ) );
+
+		graph->maze[getCoord ( graph, v )->y][getCoord ( graph, v )->x].path = true;
+		printPath (graph, s, pred[v], pred, succ, stream );
+    }
+    return succ;
+}
+/**
+cammino minimo
+*/
+void printAllpreds ( GRAPHOBJ *graph, int *pred ) {
+	int i,j;
+	for ( i = 0; i < graph->height; i++ ) {
+		for ( j = 0; j < graph->width; j++ ) {
+		
+			if ( pred[i*graph->width+j] != NIL ) {
+				printf (ANSI_COLOR_BLUE"%d"ANSI_COLOR_RESET, graph->maze[i][j].k);
+			} else {
+				printf ("%d", graph->maze[i][j].k);
+			}
+		}
+		printf ( "\n" );
+	}	
+	printf ( "\n" );
+}
+void minPath ( GRAPHOBJ *graph, int s, int v ) {
+
+	int 		*	pred 	= NULL;
+	Set 		*	succ 	= NULL;
+	Set 		*	def 	= NULL;
+	int y = 2;
+	int x = 4;
+	pred = graph->path ( graph, s, v );
+	if ( pred != NULL ) {
+	//if ( 1 ) {
+
+		FILE *stream = NULL;
+		//stream = openStream ( "pred.txt", "w+" );
+		succ = printPath ( graph, s, v, pred, succ, stream );
+		//closeStream ( stream );
+		cPrintMaze ( graph, succ, s, v );
+	} else { 
+		printf ("pred nullo\n");
+	}
+	int i,j;
+	int k = 0;
+		//printAllpreds ( graph, pred );
+	//FILE *stream1 = openStream ( "def.txt", "w+" );
+	//printSet ( def, stream1 );
+	//closeStream ( stream1 );
+	free ( pred );
+
+}
+
+void cPrintMaze ( GRAPHOBJ *graph, Set * succ, int s, int v ) {
+
+	int i, j, k;
+	VCOORD *cur;
+
+	for ( i = 0; i < graph->height; i++ ) {
+		for ( j = 0; j < graph->width; j++ ) {
+			
+
+			if ( i*graph->width+j == s ||  i*graph->width+j == v ) {
+
+				printf (ANSI_COLOR_RED"%d"ANSI_COLOR_RESET, graph->maze[i][j].k);
+
+			} else 
+
+			if ( graph->maze[i][j].path == true ) {
+				printf (ANSI_COLOR_CYAN"%d"ANSI_COLOR_RESET, graph->maze[i][j].k);
+			} else {
+				printf ("%d", graph->maze[i][j].k);
+			}
+		}
+	printf ( "\n" );
+	}
+
+	while ( !isEmpty ( succ ) ) {
+		k = getInt ( top ( succ ) );
+		succ = pop ( succ );
+		cur = getCoord ( graph, k );
+		graph->maze[cur->y][cur->x].path = false;
+	}
+
+
+}

@@ -98,6 +98,10 @@ int main ( int argc, char **argv ) {
 	target2.x = start.x + 5;
 	target2.y = start.y;
 
+	if ( target.y == -1 || target.x == -1 ) {
+		printf ("target non presente");
+		exit ( -1 );
+	}
 	
 		printf ( "start: %d (%d, %d)\n", 
 			coordToID ( graph, &start ), start.x, start.y );
@@ -107,9 +111,9 @@ int main ( int argc, char **argv ) {
 		coordToID( graph, &target );
 		printf ( "\n" );
 	
-	//pathfind ( graph, &start, &target, breadth_first_search );
-	//pathfind ( graph, &start, &target, dijkstraHeap );
-	pathfind ( graph, &start, &target, a_star_bene );
+	pathfind ( graph, &start, &target, breadth_first_search );
+	pathfind ( graph, &start, &target, dijkstraHeap );
+	pathfind ( graph, &start, &target, a_star );
 
 
 	return 0;

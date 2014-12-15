@@ -24,4 +24,9 @@ VCOORD *getCoord ( GRAPHOBJ *graph, int u );
 int coordToID ( GRAPHOBJ *graph, VCOORD *c );
 VCOORD **buildMap ( GRAPHOBJ * graph, char *mazeStr );
 
+Set 	*	printPath ( GRAPHOBJ *graph, int s , int v, int *pred, Set *succ, FILE *stream );
+void 		minPath ( GRAPHOBJ *graph, int s, int v );
+void 		cPrintMaze ( GRAPHOBJ *graph, Set * succ, int s, int v );
+
+
 #endif

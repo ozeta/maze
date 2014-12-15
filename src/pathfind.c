@@ -16,6 +16,7 @@
 #define EAST(y) y + 1
 #define WEST(y) y - 1
 
+bool PRINTALL = false;
 void predPrint ( GRAPHOBJ *graph, int *pred, char *str ) {
 	int i;
 	FILE *stream = openStream ( str, "w+" );
@@ -44,36 +45,57 @@ void printDist ( GRAPHOBJ *graph, FILE *stream, int *dist ) {
 	}
 	fprintf ( stream, "\n\n" );	
 }
-int getMatrixWeight ( GRAPHOBJ *graph, int u, int v ) {
-	int weight = 1;
-	return weight;
-}
 
 Set *getAdjList ( struct gObj *graph, int u ) {
 	Set *Adj = NULL;
 	int x = u % graph->width;
 	int y = u / graph->width;
 	int neighbor;
-
+	bool diagonals = false;
 
 	if ( NORTH(y) > 0 && graph->maze[NORTH(y)][x].k != 9 ) {
+	//if ( NORTH(y) > 0 ) {
 		neighbor = graph->width * ( NORTH(y) ) + ( x );
 		Adj = enqueue ( Adj, setInt ( neighbor ) );
 	}
 	if ( EAST(x) < graph->width && graph->maze[y][EAST(x)].k != 9  ) {
+	//if ( EAST(x) < graph->width  ) {
 		neighbor = graph->width * ( y ) + ( EAST(x) );		
 		Adj = enqueue ( Adj, setInt ( neighbor ) );
 	}
 	if ( SOUTH(y) < graph->height && graph->maze[SOUTH(y)][x].k != 9 ) {
+	//if ( SOUTH(y) < graph->height ) {
 		neighbor = graph->width * ( SOUTH(y) ) + ( x );		
 		Adj = enqueue ( Adj, setInt ( neighbor ) );
 	}
-		if ( WEST(x) > 0 && graph->maze[y][WEST(x)].k != 9 ) {
+	if ( WEST(x) > 0 && graph->maze[y][WEST(x)].k != 9 ) {
+	//if ( WEST(x) > 0 ) {
 		neighbor = graph->width * ( y ) + ( WEST(x) );		
 		Adj = enqueue ( Adj, setInt ( neighbor ) );
 	}
-
-
+	if ( diagonals == true ) {
+		//diagonals
+		//NE
+		if ( NORTH(y) > 0 && EAST(x) < graph->width && graph->maze[NORTH(y)][EAST(x)].k != 9) {
+			neighbor = graph->width * ( NORTH(y) ) + ( EAST(x) );		
+			Adj = enqueue ( Adj, setInt ( neighbor ) );		
+		}
+		//NW
+		if ( NORTH(y) > 0 && WEST(x) > 0 && graph->maze[NORTH(y)][WEST(x)].k != 9) {
+			neighbor = graph->width * ( NORTH(y) ) + ( WEST(x) );		
+			Adj = enqueue ( Adj, setInt ( neighbor ) );		
+		}
+		//SE
+		if ( SOUTH(y) < graph->height && EAST(x) < graph->width && graph->maze[SOUTH(y)][EAST(x)].k != 9) {
+			neighbor = graph->width * ( SOUTH(y) ) + ( EAST(x) );		
+			Adj = enqueue ( Adj, setInt ( neighbor ) );		
+		}	
+		//SW
+		if ( SOUTH(y) < graph->height && WEST(x) > 0 && graph->maze[SOUTH(y)][WEST(x)].k != 9) {
+			neighbor = graph->width * ( SOUTH(y) ) + ( WEST(x) );		
+			Adj = enqueue ( Adj, setInt ( neighbor ) );		
+		}
+	}
 	return Adj;
 }
 /**
@@ -89,7 +111,6 @@ int *dijkstraHeap ( GRAPHOBJ *graph, int s, int target ) {
 	int 	*		pred;
 
 
-	int DEBUG = 0;
 	FILE *stream;
 	Q = initializeHeap ( minHeapify );
 	int i 	= 0;
@@ -120,7 +141,7 @@ int *dijkstraHeap ( GRAPHOBJ *graph, int s, int target ) {
 		dist[u] = getKey ( tmp );
 		colore[u] = NERO;
 		AdjList = graph->getAdjList ( graph, u );
-		//graph->maze[getCoord ( graph, u )->y][getCoord ( graph, u )->x].path = true;
+		if ( PRINTALL ) graph->maze[getCoord ( graph, u )->y][getCoord ( graph, u )->x].path = true;
 		if ( u == target ) {
 			return pred;			
 		}
@@ -176,6 +197,7 @@ int *breadth_first_search ( GRAPHOBJ *graph, int s, int target ) {
 	while ( !isEmpty ( frontier ) ) {
 		u = getInt ( getFront ( frontier ) );
 		AdjList = graph->getAdjList ( graph, u );
+		if ( PRINTALL ) graph->maze[getCoord ( graph, u )->y][getCoord ( graph, u )->x].path = true;
 
 		while ( !isEmpty ( AdjList ) ) {
 			v = getInt ( getFront ( AdjList ) );
@@ -196,151 +218,15 @@ int *breadth_first_search ( GRAPHOBJ *graph, int s, int target ) {
 
 	return pred;
 }
-/**
-stampa del cammino minimo
-*/
-Set *printPath ( GRAPHOBJ *graph, int s , int v, int *pred, Set *succ, FILE *stream ) {
-
-    if (v == s) {
- 		fprintf ( stream, "s: %d\n", s  );
- 		graph->maze[getCoord ( graph, s )->y][getCoord ( graph, s )->x].path = true;
- 		succ = enqueue ( succ, setInt ( s ) );
-    } else if ( pred[v] == NIL ) {
-		fprintf ( stream, "\n--non esiste cammino tra s e v--\n");
-    } else {
-		fprintf ( stream, "v: %d\n", v );
-		succ = enqueue ( succ, setInt ( v ) );
-
-		graph->maze[getCoord ( graph, v )->y][getCoord ( graph, v )->x].path = true;
-		printPath (graph, s, pred[v], pred, succ, stream );
-    }
-    return succ;
-}
-/**
-cammino minimo
-*/
-void printAllpreds ( GRAPHOBJ *graph, int *pred ) {
-	int i,j;
-	for ( i = 0; i < graph->height; i++ ) {
-		for ( j = 0; j < graph->width; j++ ) {
-		
-			if ( pred[i*graph->width+j] != NIL ) {
-				printf (ANSI_COLOR_BLUE"%d"ANSI_COLOR_RESET, graph->maze[i][j].k);
-			} else {
-				printf ("%d", graph->maze[i][j].k);
-			}
-		}
-		printf ( "\n" );
-	}	
-	printf ( "\n" );
-}
-void minPath ( GRAPHOBJ *graph, int s, int v ) {
-
-	int 		*	pred 	= NULL;
-	Set 		*	succ 	= NULL;
-	Set 		*	def 	= NULL;
-	int y = 2;
-	int x = 4;
-	pred = graph->path ( graph, s, v );
-	//if ( pred != NULL ) {
-	if ( 0 ) {
-
-		FILE *stream = openStream ( "pred.txt", "w+" );
-		succ = printPath ( graph, s, v, pred, succ, stream );
-		closeStream ( stream );
-		cPrintMaze ( graph, succ, s, v );
-	} else { 
-		printf ("pred nullo\n");
-	}
-	int i,j;
-	int k = 0;
-		//printAllpreds ( graph, pred );
-	//FILE *stream1 = openStream ( "def.txt", "w+" );
-	//printSet ( def, stream1 );
-	//closeStream ( stream1 );
-	free ( pred );
-
-}
-
-void cPrintMaze ( GRAPHOBJ *graph, Set * succ, int s, int v ) {
-
-	int i, j, k;
-	VCOORD *cur;
-
-	for ( i = 0; i < graph->height; i++ ) {
-		for ( j = 0; j < graph->width; j++ ) {
-			
-
-			if ( i*graph->width+j == s ||  i*graph->width+j == v ) {
-
-				printf (ANSI_COLOR_RED"%d"ANSI_COLOR_RESET, graph->maze[i][j].k);
-
-			} else 
-
-			if ( graph->maze[i][j].path == true ) {
-				printf (ANSI_COLOR_CYAN"%d"ANSI_COLOR_RESET, graph->maze[i][j].k);
-			} else {
-				printf ("%d", graph->maze[i][j].k);
-			}
-		}
-	printf ( "\n" );
-	}
-
-	while ( !isEmpty ( succ ) ) {
-		k = getInt ( top ( succ ) );
-		succ = pop ( succ );
-		cur = getCoord ( graph, k );
-		graph->maze[cur->y][cur->x].path = false;
-	}
-
-
-}
-
 
 int heuristic ( GRAPHOBJ *graph, int s, int t ) {
 	VCOORD *	start 		= getCoord ( graph, s );
 	VCOORD *	target 		= getCoord ( graph, t );
-	return ( abs ( start->x - target->x ) + abs ( start->y - target->y ) );
+	//return ( abs ( start->x - target->x ) + abs ( start->y - target->y ) );
+	return pow ( pow ( ( target->x - start->x ), 2 ) + pow ( ( target->y - start->y ), 2 ), 0.5 );
 }
-/*
-int *a_star ( GRAPHOBJ *graph, int s, int t ) {
-	void 	*	tmp;
-	bool 		found 		= false;
-	int 	*	pred		= ( int *) malloc ( graph->vNum * sizeof ( int ) );
-	Set 	*	AdjList		= NULL;
-	Set 	*	closed 		= NULL;
-	Heap 	*	open 		= NULL;
-	int g_score[graph->vNum];
-	int f_score[graph->vNum];
-	int i;
-	open = initializeHeap ( minHeapify );
-	for ( i = 0; i < graph->vNum; i++ ) {
-		g_score[i] 		= INFINITE;
-		f_score[i] 		= INFINITE;
-		pred[i] 	= NIL;
-	}
-	g_score[s] = 0;
-	f_score[s] = g_score[s] + heuristic ( graph, s, t );
-	insert ( open, new_HeapData ( s, 0 ) );
 
-	int current;
-	while ( !isHeapEmpty ( open ) ) {
-		tmp 				= extractFirst ( open );
-		current				= getData ( tmp );
-		f_score[current]	= getKey ( tmp );
-		if ( current == t ) {
-			found = true;
-			printf ( "\n---target found---\n");			
-		}
-		push ( closed , setInt ( current) );
-		AdjList = graph->getAdjList ( graph, current );
-		while ( !isEmpty ( AdjList ) ) {
-			
-		}		
-	}
-}
-*/
-int *a_star_bene ( GRAPHOBJ *graph, int s, int t ) {
+int *a_star ( GRAPHOBJ *graph, int s, int t ) {
 
 	void 	*	tmp;
 	Set 	*	AdjList		= NULL;
@@ -356,61 +242,101 @@ int *a_star_bene ( GRAPHOBJ *graph, int s, int t ) {
 		g[i] 		= 0;
 		pred[i] 	= NIL;
 	}
+
 	f[s] = heuristic ( graph, s, t );
 	int x, y;
 	int cost;
 	open = initializeHeap ( minHeapify );
 	bool found = false;
 	insert ( open, new_HeapData ( s, 0 ) );
-	while ( !isHeapEmpty ( open ) && found == false  ) {
+	while ( !isHeapEmpty ( open ) && found == false ) {
 		tmp 	= extractFirst ( open );
+		push ( closed , setInt ( x ) );
 		x 		= getData ( tmp );
 		f[x]	= getKey ( tmp );
-		graph->maze[getCoord ( graph, x )->y][getCoord ( graph, x )->x].path = true;
+		if ( PRINTALL ) graph->maze[getCoord ( graph, x )->y][getCoord ( graph, x )->x].path = true;
+		//printf ("x: %d ", x);
 		if ( x == t ) {
 			found = true;
-			pred[y] = x;
-			printf ( "\n---target found---\n");
-			printf ("pred[%d]: %d\n", y, pred[y]);
 		} else {
-			printf ("x: %d\n", x);
+			
 			AdjList = graph->getAdjList ( graph, x );
+
 			while ( !isEmpty ( AdjList ) ) {
 				y = getInt ( getFront ( AdjList ) );
-				g[y] = g[x] + graph->getWeight ( graph, x, y ) + 1;
+				g[y] = g[x] + graph->getWeight ( graph, x, y );
+				//cost = g[y] + heuristic ( graph, y, t );
 				cost = g[y] + heuristic ( graph, y, t );
-				
-				if ( heapIntSearch ( open, y ) && cost < f[y] ) { //1
+				bool yInOpen = heapIntSearch ( open, y );
+				bool yInClosed = intSearch ( closed , y );
+				if ( yInOpen && cost < f[y] ) { //1
 					decreaseKey ( open, y, cost );
 				} 
 				
-				else if ( intSearch ( closed , y ) && cost < f[y] ) { //2
+				else if (  yInClosed && cost < f[y] ) { //2
 					deleteFromSet ( closed, y );
 					insert ( open, new_HeapData ( y, cost ) );
 				}
 				
-				else if ( !intSearch ( closed , y ) && !heapIntSearch ( open, y ) ) { // 3
+				else if ( !yInClosed && !yInOpen ) { // 3
 					insert ( open, new_HeapData ( y, cost ) );
-				} 
+				}
 				AdjList = dequeue ( AdjList );
-				push ( closed , setInt ( x ) );
-				pred[y] = x;
-				printf ("%d ", y);
+				
+				if ( pred[y] == NIL )
+					pred[y] = x;
+				//printf ("%d ", y);
+				//printf ("pred[%d]: %d\n", y, x);
+				
 			}
-			printf ("\n\n");
+
 		}
-			
-	}	
+				
+	}
+	pred[s] = NIL;
 	printf ("\n\n");
 /*
 	for ( i = 0; i < graph->vNum; i++ ) {
-		printf ("pred: %d\n", pred[i]);
-	}
-*/
-	if ( found == true ) {
-		return pred;
-	} else {
-		return NULL;
+		printf ("pred[%d]: %d\n", i, pred[i]);
 	}
 
+	int cur = t;
+	printf ("<--prev-->\n");
+	printf ("%d ", cur );
+	
+	while ( cur >= 0 && pred[cur] != NIL ) {
+		printf ("%d ", pred[cur] );
+		cur = pred[cur];
+	}
+
+	*/
+	return pred;
 }
+int getMatrixWeight ( GRAPHOBJ *graph, int u, int v ) {
+	int weight = 2;
+	return weight;
+}
+
+/*
+int getMatrixWeight ( GRAPHOBJ *graph, int u, int v ) {
+	VCOORD *uu = getCoord ( graph, u );
+	VCOORD *vv = getCoord ( graph, v );
+	//right
+	if ( abs ( uu->x - vv->x ) > 0 ) {
+		if ( graph->maze[uu->y][vv->x].k == 1 ) {
+			return 1;
+		} else {
+			return INFINITE;
+		}
+	} else 	if ( abs ( uu->y - vv->y ) > 0 ) {
+		if ( graph->maze[vv->y][uu->x].k == 1 ) {
+			return 1;
+		} else {
+			return INFINITE;
+		}
+	}
+
+	return 1;
+
+}
+*/

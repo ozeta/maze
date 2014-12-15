@@ -12,9 +12,6 @@
 =======================*/
 int 		getMatrixWeight ( GRAPHOBJ *graph, int x, int y );
 Set 	*	getAdjList ( struct gObj *graph, int u );
-Set 	*	printPath ( GRAPHOBJ *graph, int s , int v, int *pred, Set *succ, FILE *stream );
-void 		minPath ( GRAPHOBJ *graph, int s, int v );
-void 		cPrintMaze ( GRAPHOBJ *graph, Set * succ, int s, int v );
 
 /**
  * BFS
@@ -31,6 +28,6 @@ void 		relax ( GRAPHOBJ *graph, Heap *Q, int u, int v, int *dist, int *prev);
  * A STAR
  */
 int heuristic ( GRAPHOBJ *graph, int s, int t );
+
 int *a_star ( GRAPHOBJ *graph, int s, int t );
-int *a_star_bene ( GRAPHOBJ *graph, int s, int t );
 #endif
