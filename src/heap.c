@@ -183,6 +183,7 @@ void updateKey ( Heap *H, int i, int value )  {
 		increaseKey ( H, i, value );
 	}
 }
+//decrementa l'elemento in cui data = i
 void decreaseKey ( Heap *H, int i, int value ) {
 
 	int k  = 1;
@@ -195,7 +196,28 @@ void decreaseKey ( Heap *H, int i, int value ) {
 		H->heapify ( H, f );	
 	}
 }
+//cancella dallo heap
+void removeItemI ( Heap *H, int i ) {
 
+	if ( H->heapsize < 1 ) {
+		printf ("\nheap underflow\n");
+	} else {
+		int k  = 1;
+		while ( k < H->heapsize && H->A[k]->data != i ) {
+			k++;
+		}			
+		H->A[k]->data = H->A[H->heapsize-1]->data;
+
+		if ( H->A[H->heapsize-1]->key > H->A[k]->key ) {
+			increaseKey ( H, k, H->A[H->heapsize-1]->key );
+		} else {
+			decreaseKey ( H, i, H->A[H->heapsize-1]->key );
+		}
+		H->heapsize--;
+		
+	}
+
+}
 /*
 */
 void increaseKey ( Heap *H, int i, int value ) {

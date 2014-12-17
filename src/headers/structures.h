@@ -3,9 +3,9 @@
 
 
 #include "set.h"
-#define BIANCO 		0
-#define GRIGIO 		1
-#define	NERO 		2
+#define WHITE 		0
+#define GREY 		1
+#define	BLACK 		2
 #define INFINITE 	1000000
 #define NIL			-1000000
 
@@ -40,12 +40,13 @@ typedef struct GraphT_Struct {
 	int		weight;
 
 } GraphT;
+
 typedef struct {
 	int x;
 	int y;
-	int k;
+	int k;		//value of the position
 	int ID;
-	bool path;
+	bool path;	//temporary field used to print the path
 } VCOORD;
 
 typedef struct gObj {
@@ -59,12 +60,13 @@ typedef struct gObj {
 	VERTEX 	* 		list;
 	*/
 	//numero vertici
-	int 			vNum;
+	int 			vNum;			//number of vertices
 
-	VCOORD 	**		maze;	
-	int 			width;
-	int 			height;
+	VCOORD 	**		maze;			//pointer to implicit maze
+	int 			width;			//width of the maze
+	int 			height;			//height of the maze
 
+	//function pointers
 	struct gObj * 	( *build) 			( struct gObj *, int );
 	Set *			( *getAdjList )		( struct gObj *graph, int u );
 	

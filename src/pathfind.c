@@ -124,7 +124,7 @@ int *dijkstraHeap ( GRAPHOBJ *graph, int s, int target ) {
 	for ( v = 0; v < graph->vNum; v++ ) {
 		dist[v] 	= INFINITE;
 		pred[v] 	= NIL;
-		colore[v] 	= BIANCO;
+		colore[v] 	= WHITE;
 	}
 	dist[s] = 0;
 	pred[s] = s;
@@ -139,7 +139,7 @@ int *dijkstraHeap ( GRAPHOBJ *graph, int s, int target ) {
 		tmp 	= extractFirst ( Q );
 		u 		= getData ( tmp );
 		dist[u] = getKey ( tmp );
-		colore[u] = NERO;
+		colore[u] = BLACK;
 		AdjList = graph->getAdjList ( graph, u );
 		if ( PRINTALL ) graph->maze[getCoord ( graph, u )->y][getCoord ( graph, u )->x].path = true;
 		if ( u == target ) {
@@ -148,7 +148,7 @@ int *dijkstraHeap ( GRAPHOBJ *graph, int s, int target ) {
 		while ( !isEmpty ( AdjList ) ) {
 			v = getInt ( getFront ( AdjList ) );
 			
-			if ( colore[v] == BIANCO ) {
+			if ( colore[v] == WHITE ) {
 				relax ( graph, Q, u, v, dist, pred );
 			}
 			AdjList = dequeue ( AdjList );
@@ -177,19 +177,20 @@ int *breadth_first_search ( GRAPHOBJ *graph, int s, int target ) {
 		return NULL;
 	}
 
-	int u;
-	int v;
-	int colore[graph->vNum];
-	int *	pred		= ( int *) malloc ( graph->vNum * sizeof ( int ) );
+	int u;							//start node
+	int v;							//target
+	int color[graph->vNum];			//color of the node
+	Set *	frontier	= NULL;		//frontier implemented as queue
+	Set *	AdjList 	= NULL;		//Adjiacency list implemented as queue
+	int *	pred		= ( int *) malloc ( graph->vNum * sizeof ( int ) );	//reverse path
 	memset ( pred, 0, graph->vNum );
-	Set *	frontier	= NULL;
-	Set *	AdjList 	= NULL;
 
+	//initialization
 	for ( u = 0; u < graph->vNum; u++ ) {
-		colore[u] 	= BIANCO;
+		color[u] 	= WHITE;
 		pred[u]		= NIL;
 	}
-	colore[s] 	= GRIGIO;
+	color[s] 	= GREY;
 	pred[s]		= 0;
 
 	frontier = enqueue ( frontier, setInt ( s ) );
@@ -197,13 +198,15 @@ int *breadth_first_search ( GRAPHOBJ *graph, int s, int target ) {
 	while ( !isEmpty ( frontier ) ) {
 		u = getInt ( getFront ( frontier ) );
 		AdjList = graph->getAdjList ( graph, u );
+
+		//getCoord: uses the ID to get the x and y coordinates
 		if ( PRINTALL ) graph->maze[getCoord ( graph, u )->y][getCoord ( graph, u )->x].path = true;
 
 		while ( !isEmpty ( AdjList ) ) {
 			v = getInt ( getFront ( AdjList ) );
 			AdjList = dequeue ( AdjList );
-			if ( colore[v] == BIANCO ) {
-				colore[v] = GRIGIO;
+			if ( color[v] == WHITE ) {
+				color[v] = GREY;
 				pred[v] = u;
 				frontier = enqueue ( frontier, setInt ( v ) );
 			}
@@ -213,7 +216,7 @@ int *breadth_first_search ( GRAPHOBJ *graph, int s, int target ) {
 			}
 		}
 		frontier = dequeue ( frontier );
-		colore[u] = NERO;
+		color[u] = BLACK;
 	}
 
 	return pred;
@@ -222,98 +225,12 @@ int *breadth_first_search ( GRAPHOBJ *graph, int s, int target ) {
 int heuristic ( GRAPHOBJ *graph, int s, int t ) {
 	VCOORD *	start 		= getCoord ( graph, s );
 	VCOORD *	target 		= getCoord ( graph, t );
-	//return ( abs ( start->x - target->x ) + abs ( start->y - target->y ) );
-	return pow ( pow ( ( target->x - start->x ), 2 ) + pow ( ( target->y - start->y ), 2 ), 0.5 );
+	/*manhattan*///return ( abs ( start->x - target->x ) + abs ( start->y - target->y ) );
+	/*euclidian*/return pow ( pow ( ( target->x - start->x ), 2 ) + pow ( ( target->y - start->y ), 2 ), 0.5 );
 }
 
-int *a_star ( GRAPHOBJ *graph, int s, int t ) {
-
-	void 	*	tmp;
-	Set 	*	AdjList		= NULL;
-	Set 	*	closed 		= NULL;
-	Heap 	*	open 		= NULL;
-	int 	*	pred		= ( int *) malloc ( graph->vNum * sizeof ( int ) );
-
-	int g[graph->vNum];
-	int f[graph->vNum];
-	int i;
-	for ( i = 0; i < graph->vNum; i++ ) {
-		f[i] 		= INFINITE;
-		g[i] 		= 0;
-		pred[i] 	= NIL;
-	}
-
-	f[s] = heuristic ( graph, s, t );
-	int x, y;
-	int cost;
-	open = initializeHeap ( minHeapify );
-	bool found = false;
-	insert ( open, new_HeapData ( s, 0 ) );
-	while ( !isHeapEmpty ( open ) && found == false ) {
-		tmp 	= extractFirst ( open );
-		push ( closed , setInt ( x ) );
-		x 		= getData ( tmp );
-		f[x]	= getKey ( tmp );
-		if ( PRINTALL ) graph->maze[getCoord ( graph, x )->y][getCoord ( graph, x )->x].path = true;
-		//printf ("x: %d ", x);
-		if ( x == t ) {
-			found = true;
-		} else {
-			
-			AdjList = graph->getAdjList ( graph, x );
-
-			while ( !isEmpty ( AdjList ) ) {
-				y = getInt ( getFront ( AdjList ) );
-				g[y] = g[x] + graph->getWeight ( graph, x, y );
-				//cost = g[y] + heuristic ( graph, y, t );
-				cost = g[y] + heuristic ( graph, y, t );
-				bool yInOpen = heapIntSearch ( open, y );
-				bool yInClosed = intSearch ( closed , y );
-				if ( yInOpen && cost < f[y] ) { //1
-					decreaseKey ( open, y, cost );
-				} 
-				
-				else if (  yInClosed && cost < f[y] ) { //2
-					deleteFromSet ( closed, y );
-					insert ( open, new_HeapData ( y, cost ) );
-				}
-				
-				else if ( !yInClosed && !yInOpen ) { // 3
-					insert ( open, new_HeapData ( y, cost ) );
-				}
-				AdjList = dequeue ( AdjList );
-				
-				if ( pred[y] == NIL )
-					pred[y] = x;
-				//printf ("%d ", y);
-				//printf ("pred[%d]: %d\n", y, x);
-				
-			}
-
-		}
-				
-	}
-	pred[s] = NIL;
-	printf ("\n\n");
-/*
-	for ( i = 0; i < graph->vNum; i++ ) {
-		printf ("pred[%d]: %d\n", i, pred[i]);
-	}
-
-	int cur = t;
-	printf ("<--prev-->\n");
-	printf ("%d ", cur );
-	
-	while ( cur >= 0 && pred[cur] != NIL ) {
-		printf ("%d ", pred[cur] );
-		cur = pred[cur];
-	}
-
-	*/
-	return pred;
-}
 int getMatrixWeight ( GRAPHOBJ *graph, int u, int v ) {
-	int weight = 2;
+	int weight = 1;
 	return weight;
 }
 
@@ -340,3 +257,56 @@ int getMatrixWeight ( GRAPHOBJ *graph, int u, int v ) {
 
 }
 */
+int *reconstruct_path ( int *came_from, int current ) {
+	Set *total_path = NULL;
+	total_path = enqueue ( total_path, setInt ( current ) );
+	while ( current > 0 ) {
+		printf ( "current: %4d ", current );
+		current = came_from[current];
+		total_path = enqueue ( total_path, setInt ( current ) );
+	}
+	return NULL;
+}
+int *a_star ( GRAPHOBJ *graph, int s, int t ) {
+
+	int i;
+	int current;
+	bool found 				= false;
+	void 	*	tmp;					//used to store Heap first element
+	Set 	*	AdjList		= NULL;		//Adjiacence list implemented as queue
+	Heap 	*	frontier	= NULL;		//Open set implemented as Heap
+	frontier 				= initializeHeap ( minHeapify );
+	int 	*	came_from	= ( int *) malloc ( graph->vNum * sizeof ( int ) );
+	int 	*	cost_so_far	= ( int *) malloc ( graph->vNum * sizeof ( int ) );
+
+
+	//initialization
+	for ( i = 0; i < graph->vNum; i++ ) {
+		came_from[i] 	= NIL;
+		cost_so_far[i] 	= INFINITE;
+	}
+	insert ( frontier, new_HeapData ( s, 0 ) );
+	cost_so_far[s] 	= 0;
+	while ( !isHeapEmpty ( frontier ) ) {
+		tmp 	= extractFirst ( frontier );
+		current = getData ( tmp );
+		if ( 0 ) graph->maze[getCoord ( graph, current )->y][getCoord ( graph, current )->x].path = true;
+
+		if ( current == t ) {
+			break;
+		}
+		AdjList = graph->getAdjList ( graph, current );
+		while ( !isEmpty ( AdjList ) ) {
+			int y = getInt ( getFront ( AdjList ) );
+			AdjList = dequeue ( AdjList );
+			int new_cost = cost_so_far[current] + graph->getWeight ( graph, current, y );
+			if ( cost_so_far[y] == INFINITE || new_cost < cost_so_far[y] ) {
+				cost_so_far[y] = new_cost;
+				int priority = new_cost + heuristic ( graph, y, t );
+				insert ( frontier, new_HeapData ( y, priority ) );
+				came_from[y] = current;
+			}
+		}
+ 	}
+	return came_from;
+}

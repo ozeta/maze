@@ -157,14 +157,15 @@ void minPath ( GRAPHOBJ *graph, int s, int v ) {
 		FILE *stream = NULL;
 		//stream = openStream ( "pred.txt", "w+" );
 		succ = printPath ( graph, s, v, pred, succ, stream );
-		//closeStream ( stream );
 		cPrintMaze ( graph, succ, s, v );
+		//printAllpreds ( graph, pred );
+		//closeStream ( stream );
 	} else { 
 		printf ("pred nullo\n");
 	}
 	int i,j;
 	int k = 0;
-		//printAllpreds ( graph, pred );
+	//stampa tutti i nodi visitati
 	//FILE *stream1 = openStream ( "def.txt", "w+" );
 	//printSet ( def, stream1 );
 	//closeStream ( stream1 );
