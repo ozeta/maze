@@ -26,27 +26,36 @@ void predPrint ( GRAPHOBJ *graph, int *pred, char *str ) {
 	closeStream ( stream );
 }
 
-void printAdj ( GRAPHOBJ *graph, int u, Set *Adj, FILE *stream ) {
-	char *s ="-------------------";
-	if ( Adj ) {
-		fprintf ( stream, "nodo %3d:\n", u );
-		fprintf ( stream, "Adiacenze:\n" );
-		printSet ( Adj, stream );
-		fprintf ( stream, "\n%s%s%s\n", s, s, s );
-	} else {
-		fprintf ( stream, "nessuna adiacenza\n" );
-	}
-}
-void printDist ( GRAPHOBJ *graph, FILE *stream, int *dist ) {
-	fprintf ( stream, "distanze:\n\n");
-	int k;
-	for ( k = 0; k < graph->vNum; k++ ) {
-		fprintf ( stream, " [%d]->%d, ", k, dist[k]);
-	}
-	fprintf ( stream, "\n\n" );	
+int getMazeWeight ( GRAPHOBJ *graph, int u, int v ) {
+	int weight = 1;
+	return weight;
 }
 
-Set *getAdjList ( struct gObj *graph, int u ) {
+/*
+int getMatrixWeight ( GRAPHOBJ *graph, int u, int v ) {
+	VCOORD *uu = getCoord ( graph, u );
+	VCOORD *vv = getCoord ( graph, v );
+	//right
+	if ( abs ( uu->x - vv->x ) > 0 ) {
+		if ( graph->maze[uu->y][vv->x].k == 1 ) {
+			return 1;
+		} else {
+			return INFINITE;
+		}
+	} else 	if ( abs ( uu->y - vv->y ) > 0 ) {
+		if ( graph->maze[vv->y][uu->x].k == 1 ) {
+			return 1;
+		} else {
+			return INFINITE;
+		}
+	}
+
+	return 1;
+
+}
+*/
+
+Set *getMazeAdjList ( struct gObj *graph, int u ) {
 	Set *Adj = NULL;
 	int x = u % graph->width;
 	int y = u / graph->width;
@@ -105,14 +114,14 @@ int *dijkstraHeap ( GRAPHOBJ *graph, int s, int target ) {
 	/**
 	 * inizializzazioni
 	 */
-	Heap 	*		Q 			= NULL;
+	Heap 	*		frontier 	= NULL;
 	Set 	*		AdjList 	= NULL;
 	Data 	*		tmp;
 	int 	*		pred;
 
 
 	FILE *stream;
-	Q = initializeHeap ( minHeapify );
+	frontier = initializeHeap ( minHeapify );
 	int i 	= 0;
 	int v 	= 0;
 	int u 	= 0;
@@ -128,19 +137,20 @@ int *dijkstraHeap ( GRAPHOBJ *graph, int s, int target ) {
 	}
 	dist[s] = 0;
 	pred[s] = s;
-	insert ( Q, new_HeapData ( s, 0 ) );
+	insert ( frontier, new_HeapData ( s, 0 ) );
 
 	char path[50];
-	buildHeap ( Q );
+	buildHeap ( frontier );
 
 	//main loop
-	while ( Q->heapsize > 1 ) {
+	while ( frontier->heapsize > 1 ) {
 		//remove and return the best vertex
-		tmp 	= extractFirst ( Q );
+		tmp 	= extractFirst ( frontier );
 		u 		= getData ( tmp );
 		dist[u] = getKey ( tmp );
 		colore[u] = BLACK;
 		AdjList = graph->getAdjList ( graph, u );
+		//debug
 		if ( PRINTALL ) graph->maze[getCoord ( graph, u )->y][getCoord ( graph, u )->x].path = true;
 		if ( u == target ) {
 			return pred;			
@@ -149,23 +159,24 @@ int *dijkstraHeap ( GRAPHOBJ *graph, int s, int target ) {
 			v = getInt ( getFront ( AdjList ) );
 			
 			if ( colore[v] == WHITE ) {
-				relax ( graph, Q, u, v, dist, pred );
+				relax ( graph, frontier, u, v, dist, pred );
 			}
 			AdjList = dequeue ( AdjList );
 		}
 	}
-	return pred;
+	free ( pred );
+	return NULL;
 }
-void relax ( GRAPHOBJ *graph, Heap *Q, int u, int v, int *dist, int *pred) {
+void relax ( GRAPHOBJ *graph, Heap *frontier, int u, int v, int *dist, int *pred) {
 	int alt;
 	alt = dist[u] + graph->getWeight ( graph, u, v );
 	if ( alt < dist[v] ) {
 		dist[v] = alt;
 		pred[v] = u;
-		if ( heapIntSearch ( Q , v ) ) {
-			decreaseKey ( Q, v, alt ) ;
+		if ( heapIntSearch ( frontier , v ) ) {
+			decreaseKey ( frontier, v, alt ) ;
 		} else {
-			insert ( Q, new_HeapData ( v, alt ) );
+			insert ( frontier, new_HeapData ( v, alt ) );
 		}
 	}
 }
@@ -199,7 +210,7 @@ int *breadth_first_search ( GRAPHOBJ *graph, int s, int target ) {
 		u = getInt ( getFront ( frontier ) );
 		AdjList = graph->getAdjList ( graph, u );
 
-		//getCoord: uses the ID to get the x and y coordinates
+		//debug
 		if ( PRINTALL ) graph->maze[getCoord ( graph, u )->y][getCoord ( graph, u )->x].path = true;
 
 		while ( !isEmpty ( AdjList ) ) {
@@ -218,8 +229,8 @@ int *breadth_first_search ( GRAPHOBJ *graph, int s, int target ) {
 		frontier = dequeue ( frontier );
 		color[u] = BLACK;
 	}
-
-	return pred;
+	free ( pred );
+	return NULL;
 }
 
 int heuristic ( GRAPHOBJ *graph, int s, int t ) {
@@ -229,84 +240,48 @@ int heuristic ( GRAPHOBJ *graph, int s, int t ) {
 	/*euclidian*/return pow ( pow ( ( target->x - start->x ), 2 ) + pow ( ( target->y - start->y ), 2 ), 0.5 );
 }
 
-int getMatrixWeight ( GRAPHOBJ *graph, int u, int v ) {
-	int weight = 1;
-	return weight;
-}
-
-/*
-int getMatrixWeight ( GRAPHOBJ *graph, int u, int v ) {
-	VCOORD *uu = getCoord ( graph, u );
-	VCOORD *vv = getCoord ( graph, v );
-	//right
-	if ( abs ( uu->x - vv->x ) > 0 ) {
-		if ( graph->maze[uu->y][vv->x].k == 1 ) {
-			return 1;
-		} else {
-			return INFINITE;
-		}
-	} else 	if ( abs ( uu->y - vv->y ) > 0 ) {
-		if ( graph->maze[vv->y][uu->x].k == 1 ) {
-			return 1;
-		} else {
-			return INFINITE;
-		}
-	}
-
-	return 1;
-
-}
-*/
-int *reconstruct_path ( int *came_from, int current ) {
-	Set *total_path = NULL;
-	total_path = enqueue ( total_path, setInt ( current ) );
-	while ( current > 0 ) {
-		printf ( "current: %4d ", current );
-		current = came_from[current];
-		total_path = enqueue ( total_path, setInt ( current ) );
-	}
-	return NULL;
-}
 int *a_star ( GRAPHOBJ *graph, int s, int t ) {
 
-	int i;
+	int i, cost;
 	int current;
 	bool found 				= false;
 	void 	*	tmp;					//used to store Heap first element
 	Set 	*	AdjList		= NULL;		//Adjiacence list implemented as queue
-	Heap 	*	frontier	= NULL;		//Open set implemented as Heap
+	Heap 	*	frontier	= NULL;		//Open set implemented as a Heap
 	frontier 				= initializeHeap ( minHeapify );
-	int 	*	came_from	= ( int *) malloc ( graph->vNum * sizeof ( int ) );
-	int 	*	cost_so_far	= ( int *) malloc ( graph->vNum * sizeof ( int ) );
+	int 	*	pred		= ( int *) malloc ( graph->vNum * sizeof ( int ) );
+	int 	*	g			= ( int *) malloc ( graph->vNum * sizeof ( int ) );
 
 
 	//initialization
 	for ( i = 0; i < graph->vNum; i++ ) {
-		came_from[i] 	= NIL;
-		cost_so_far[i] 	= INFINITE;
+		pred[i] 	= NIL;
+		g[i] 	= INFINITE;
 	}
 	insert ( frontier, new_HeapData ( s, 0 ) );
-	cost_so_far[s] 	= 0;
+	g[s] 	= 0;
 	while ( !isHeapEmpty ( frontier ) ) {
 		tmp 	= extractFirst ( frontier );
 		current = getData ( tmp );
-		if ( 0 ) graph->maze[getCoord ( graph, current )->y][getCoord ( graph, current )->x].path = true;
+		//debug
+		if ( PRINTALL ) graph->maze[getCoord ( graph, current )->y][getCoord ( graph, current )->x].path = true;
 
 		if ( current == t ) {
-			break;
+			return pred;
 		}
 		AdjList = graph->getAdjList ( graph, current );
 		while ( !isEmpty ( AdjList ) ) {
 			int y = getInt ( getFront ( AdjList ) );
 			AdjList = dequeue ( AdjList );
-			int new_cost = cost_so_far[current] + graph->getWeight ( graph, current, y );
-			if ( cost_so_far[y] == INFINITE || new_cost < cost_so_far[y] ) {
-				cost_so_far[y] = new_cost;
-				int priority = new_cost + heuristic ( graph, y, t );
+			cost = g[current] + graph->getWeight ( graph, current, y );
+			if ( g[y] == INFINITE || cost < g[y] ) {
+				g[y] = cost;
+				int priority = cost + heuristic ( graph, y, t );
 				insert ( frontier, new_HeapData ( y, priority ) );
-				came_from[y] = current;
+				pred[y] = current;
 			}
 		}
  	}
-	return came_from;
+ 	free ( pred );
+	return NULL;
 }

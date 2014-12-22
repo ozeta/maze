@@ -34,5 +34,5 @@ int 		isEmpty ( Set *queue );
 void 		clearSet ( Set *set );
 void 	*	setCoord ( int x, int y );
 void 	*	getTail ( Set *queue );
-Set *deleteFromSet ( Set * set, int input );
+Set 	*	deleteFromSet ( Set * set, int input );
 #endif

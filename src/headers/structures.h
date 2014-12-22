@@ -38,7 +38,8 @@ typedef struct vertex {
 typedef struct GraphT_Struct {
 
 	int		weight;
-
+	int 	ID;
+	int 	k;
 } GraphT;
 
 typedef struct {
@@ -51,12 +52,11 @@ typedef struct {
 
 typedef struct gObj {
 
-	/*
+	
 	//puntatore a matrice di adiacenza
 	GraphT 	** 		matrix;
+	/*
 	//puntatore a lista di adiacenza
-	* e' stata scelta una rappresentazione di lista concatenata di vertici 
-	* per rendere inserimento e cancellazione in tempo lineare
 	VERTEX 	* 		list;
 	*/
 	//numero vertici

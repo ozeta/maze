@@ -7,8 +7,10 @@
 #include "./src/headers/parser.h"
 #include "./src/headers/functions.h"
 #include "./src/headers/pathfind.h"
+#include "./src/headers/lib.h"
+#include "./src/headers/set.h"
 
-bool CLOCKT = true;
+bool CLOCKT = false;
 
 void pathfind ( GRAPHOBJ *graph, VCOORD *start, VCOORD *target, PATH alg ) {
 	clock_t start_t, end_t, total_t;
@@ -16,8 +18,8 @@ void pathfind ( GRAPHOBJ *graph, VCOORD *start, VCOORD *target, PATH alg ) {
 	graph->path = alg;
 	start_t = clock();
 
-	minPath ( graph, coordToID ( graph, start ) , coordToID( graph, target ) );
-
+	Set *succ = minPath ( graph, coordToID ( graph, start ) , coordToID( graph, target ) );
+	cPrintMaze ( graph, succ, coordToID ( graph, start ), coordToID( graph, target ) );
 	if ( CLOCKT ) {
 		end_t = clock();
 		printf("End of the big loop, end_t = %ld\n", end_t);
@@ -27,6 +29,28 @@ void pathfind ( GRAPHOBJ *graph, VCOORD *start, VCOORD *target, PATH alg ) {
 	}
 	printf ( "\n" );
 
+}
+void pathfindExplicit ( GRAPHOBJ *graph, VCOORD *start, VCOORD *target, PATH alg ) {
+
+
+	int 		*	pred 	= NULL;
+	Set 		*	succ 	= NULL;
+	Set 		*	def 	= NULL;
+	char		*	string 	= "pred.txt";
+	graph->path = alg;
+	pred = graph->path ( graph, coordToID ( graph, start ), 
+						coordToID ( graph, target ) );
+
+	if ( pred != NULL ) {
+		printf ("array of prev vertexes printed on %s\n", string );
+		FILE *stream = NULL;
+		stream = openStream ( string, "w+" );
+		succ = explicitPrintPath ( graph, coordToID ( graph, start ), 
+				coordToID ( graph, target ), pred, succ, stream );
+		closeStream ( stream );
+	} else { 
+		printf ("\n--target not found--\n");
+	}
 }
 void intializePaths ( GRAPHOBJ *graph, VCOORD *start, VCOORD *target ) {
 	int i, j;
@@ -71,50 +95,78 @@ int main ( int argc, char **argv ) {
 					"./maps/implicit7.txt" };
 	if ( argc == 2 ) {
 		l = atoi(argv[1]);
+		if ( l < 0 || l > 7 ) {
+		printf ( "usage: ./labirinto n\n");
+		printf ( "n is a value from 0 to 7 \n");
+		exit ( 0 );			
+		}
+	} else {
+		printf ( "usage: ./labirinto n\n");
+		printf ( "n is a value from 0 to 7 \n");
+		exit ( 0 );
 	}
-	clock_t start_t, end_t, total_t;
+
+	GRAPHOBJ *graph  = initializeGraph ( buildGraph, insertEdgeIntograph, 
+		getMatrixWeight, matrixInsertInterface, 
+		NULL, getAdjList, NULL );
+	GRAPHOBJ *newGraph  = initializeGraph ( buildGraph, insertEdgeIntograph, 
+		getMatrixWeight, matrixInsertInterface, 
+		NULL, getAdjList, NULL );
+
 	char *mazeStr;
-	GRAPHOBJ * graph;
-	graph = initializeGraph ( NULL, NULL, getMatrixWeight, NULL, NULL, getAdjList, NULL );
 	mazeStr = mazeToString ( graph, str[l] );
 
 	int i, j;
-	//printf ( "%s", mazeStr );
 
 	VCOORD start;
 	start.x = start.y = -1;
 	VCOORD target;
 	target.x = target.y = -1;
 	
-	graph->maze = buildMap ( graph, mazeStr );
+	//implicit map callbacks
+	graph->getWeight 	= getMazeWeight;
+	graph->getAdjList 	= getMazeAdjList;
+	//explicit map callbacks
+	newGraph->getWeight 	= getMatrixWeight;
+	newGraph->getAdjList 	= getAdjList;	
+	graph->maze 			= buildMap ( graph, mazeStr );
+	newGraph				= buildExplicitGraph ( graph, newGraph, mazeStr ); 
 
+	FILE *stream = openStream ( "adj4.txt", "w+");
+	for ( i = 0; i < newGraph->vNum; i++) {
+		for ( j = 0; j < newGraph->vNum; j++) {
+			fprintf (stream, "%d", newGraph->matrix[i][j].weight );
+		}
+		fprintf (stream, "\n");
+	}
+	closeStream ( stream );
+	printf ( "numero vertici mappa: %4d\n", graph->vNum );
 
 	intializePaths ( graph, &start, &target );		
-	
-	VCOORD target1;
-	target1.x = 50;
-	target1.y = 25;
-	VCOORD target2;
-	target2.x = start.x + 5;
-	target2.y = start.y;
 
-	if ( target.y == -1 || target.x == -1 ) {
-		printf ("target non presente");
+	if ( start.y == -1 || start.x == -1 ) {
+		printf ("\n--start 's' must be on the map--\n");
 		exit ( -1 );
 	}
 	
-		printf ( "start: %d (%d, %d)\n", 
+	if ( target.y == -1 || target.x == -1 ) {
+		printf ("\n--target 't' must be on the map--\n");
+		exit ( -1 );
+	}
+	
+		printf ( "start: %4d (x:%4d,y:%4d)\n", 
 			coordToID ( graph, &start ), start.x, start.y );
 		coordToID ( graph, &start );
-		printf ( "target: %d (%d, %d)\n", 
+		printf ( "target: %d (x:%4d,y:%4d)\n", 
 			coordToID ( graph, &target ), target.x, target.y );
 		coordToID( graph, &target );
+		
 		printf ( "\n" );
-	
-	pathfind ( graph, &start, &target, breadth_first_search );
-	pathfind ( graph, &start, &target, dijkstraHeap );
+	/*
 	pathfind ( graph, &start, &target, a_star );
-
+	pathfind ( graph, &start, &target, dijkstraHeap );
+*/
+	pathfindExplicit ( newGraph, &start, &target, breadth_first_search );
 
 	return 0;
 }

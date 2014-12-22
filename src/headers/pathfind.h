@@ -10,8 +10,8 @@
 
 
 =======================*/
-int 		getMatrixWeight ( GRAPHOBJ *graph, int x, int y );
-Set 	*	getAdjList ( struct gObj *graph, int u );
+int 		getMazeWeight ( GRAPHOBJ *graph, int x, int y );
+Set 	*	getMazeAdjList ( struct gObj *graph, int u );
 
 /**
  * BFS
@@ -27,7 +27,6 @@ void 		relax ( GRAPHOBJ *graph, Heap *Q, int u, int v, int *dist, int *prev);
 /**
  * A STAR
  */
-int heuristic ( GRAPHOBJ *graph, int s, int t );
-
-int *a_star ( GRAPHOBJ *graph, int s, int t );
+int 		heuristic ( GRAPHOBJ *graph, int s, int t );
+int 	*	a_star ( GRAPHOBJ *graph, int s, int t );
 #endif
