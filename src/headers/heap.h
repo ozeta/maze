@@ -33,7 +33,7 @@ typedef struct HEAPclass {
 typedef void 	( *heapDEF ) 	( Heap *, int );
 
 Heap *initializeHeap ( heapDEF heapify );
-
+void freeHeap ( Heap *H );
 //figlio sinistro
 int left ( int i );
 //figlio destro

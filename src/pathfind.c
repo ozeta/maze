@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <assert.h>
 #include "./headers/functions.h"
 #include "./headers/set.h"
 #include "./headers/lib.h"
@@ -17,6 +18,8 @@
 #define WEST(y) y - 1
 
 bool PRINTALL = false;
+
+//stampa l'array dei vertici precedenti su stream
 void predPrint ( GRAPHOBJ *graph, int *pred, char *str ) {
 	int i;
 	FILE *stream = openStream ( str, "w+" );
@@ -26,91 +29,90 @@ void predPrint ( GRAPHOBJ *graph, int *pred, char *str ) {
 	closeStream ( stream );
 }
 
+//restituisce il peso di un arco nella mappa implicita
+//si è associato ad ogni arco peso 1
 int getMazeWeight ( GRAPHOBJ *graph, int u, int v ) {
 	int weight = 1;
 	return weight;
 }
 
-/*
-int getMatrixWeight ( GRAPHOBJ *graph, int u, int v ) {
-	VCOORD *uu = getCoord ( graph, u );
-	VCOORD *vv = getCoord ( graph, v );
-	//right
-	if ( abs ( uu->x - vv->x ) > 0 ) {
-		if ( graph->maze[uu->y][vv->x].k == 1 ) {
-			return 1;
-		} else {
-			return INFINITE;
-		}
-	} else 	if ( abs ( uu->y - vv->y ) > 0 ) {
-		if ( graph->maze[vv->y][uu->x].k == 1 ) {
-			return 1;
-		} else {
-			return INFINITE;
-		}
-	}
-
-	return 1;
-
-}
-*/
-
+//restituisce l'insieme dei vertici adiacenti sulla mappa implicita
+//sono state create 4 direzioni principali ( N S E W ) e lasciate 
+//facoltative le diagonali ( flag toroidal )
 Set *getMazeAdjList ( struct gObj *graph, int u ) {
+	assert ( graph );
 	Set *Adj = NULL;
-	int x = u % graph->width;
-	int y = u / graph->width;
+	int x 			= u % graph->width;
+	int y 			= u / graph->width;
+	bool diagonals 	= false;
+	bool toroid 	= false;
 	int neighbor;
-	bool diagonals = false;
 
+	if ( toroid && NORTH(y) == 0 && graph->maze[NORTH(y)][x].k != 9 ) {
+		neighbor = graph->width * (  0 ) + ( x );
+		Adj = enqueue ( Adj, setInt ( neighbor ) );		
+	}
+	if ( toroid && NORTH(y) < 0 && graph->maze[graph->height -1][x].k != 9 ) {
+		neighbor = graph->width * (  graph->height -1 ) + ( x );
+		Adj = enqueue ( Adj, setInt ( neighbor ) );		
+	}	
 	if ( NORTH(y) > 0 && graph->maze[NORTH(y)][x].k != 9 ) {
 	//if ( NORTH(y) > 0 ) {
 		neighbor = graph->width * ( NORTH(y) ) + ( x );
 		Adj = enqueue ( Adj, setInt ( neighbor ) );
 	}
-	if ( EAST(x) < graph->width && graph->maze[y][EAST(x)].k != 9  ) {
+
+	if ( toroid && EAST(x) == graph->width - 1 && graph->maze[y][EAST(x)].k != 9 && graph->maze[y][0].k != 9) {
+		neighbor = graph->width * ( y ) + ( EAST(x) );		
+		Adj = enqueue ( Adj, setInt ( neighbor ) );
+	}
+	if ( toroid && EAST(x) > graph->width - 1 && graph->maze[y][0].k != 9 ) {
+		neighbor = graph->width * ( y ) + ( 0 );		
+		Adj = enqueue ( Adj, setInt ( neighbor ) );
+	}	
+	if ( EAST(x) < graph->width && graph->maze[y][EAST(x)].k != 9   ) {
 	//if ( EAST(x) < graph->width  ) {
 		neighbor = graph->width * ( y ) + ( EAST(x) );		
 		Adj = enqueue ( Adj, setInt ( neighbor ) );
+	}
+	
+	if ( toroid && SOUTH(y) == graph->height -1  && graph->maze[SOUTH(y)][x].k != 9 ) {
+		neighbor = graph->width * (  SOUTH(y) ) + ( x );
+		Adj = enqueue ( Adj, setInt ( neighbor ) );		
+	}	
+	if ( toroid && SOUTH(y) > graph->height -1  && graph->maze[(y)][x].k != 9&& graph->maze[0][x].k != 9 ) {
+		neighbor = graph->width * (  0 ) + ( x );
+		Adj = enqueue ( Adj, setInt ( neighbor ) );		
 	}
 	if ( SOUTH(y) < graph->height && graph->maze[SOUTH(y)][x].k != 9 ) {
 	//if ( SOUTH(y) < graph->height ) {
 		neighbor = graph->width * ( SOUTH(y) ) + ( x );		
 		Adj = enqueue ( Adj, setInt ( neighbor ) );
 	}
+	
+	if ( toroid && WEST(x) == 0 && graph->maze[y][WEST(x)].k != 9 ) {
+		neighbor = graph->width * ( y ) + ( WEST(x) );		
+		Adj = enqueue ( Adj, setInt ( neighbor ) );
+	}
+
+	if ( toroid && WEST(x) < 0 && graph->maze[y][(x)].k != 9 && graph->maze[y][graph->width - 1].k != 9) {
+		neighbor = graph->width * ( y ) + ( graph->width - 1 );		
+		Adj = enqueue ( Adj, setInt ( neighbor ) );
+	}
+
 	if ( WEST(x) > 0 && graph->maze[y][WEST(x)].k != 9 ) {
 	//if ( WEST(x) > 0 ) {
 		neighbor = graph->width * ( y ) + ( WEST(x) );		
 		Adj = enqueue ( Adj, setInt ( neighbor ) );
 	}
-	if ( diagonals == true ) {
-		//diagonals
-		//NE
-		if ( NORTH(y) > 0 && EAST(x) < graph->width && graph->maze[NORTH(y)][EAST(x)].k != 9) {
-			neighbor = graph->width * ( NORTH(y) ) + ( EAST(x) );		
-			Adj = enqueue ( Adj, setInt ( neighbor ) );		
-		}
-		//NW
-		if ( NORTH(y) > 0 && WEST(x) > 0 && graph->maze[NORTH(y)][WEST(x)].k != 9) {
-			neighbor = graph->width * ( NORTH(y) ) + ( WEST(x) );		
-			Adj = enqueue ( Adj, setInt ( neighbor ) );		
-		}
-		//SE
-		if ( SOUTH(y) < graph->height && EAST(x) < graph->width && graph->maze[SOUTH(y)][EAST(x)].k != 9) {
-			neighbor = graph->width * ( SOUTH(y) ) + ( EAST(x) );		
-			Adj = enqueue ( Adj, setInt ( neighbor ) );		
-		}	
-		//SW
-		if ( SOUTH(y) < graph->height && WEST(x) > 0 && graph->maze[SOUTH(y)][WEST(x)].k != 9) {
-			neighbor = graph->width * ( SOUTH(y) ) + ( WEST(x) );		
-			Adj = enqueue ( Adj, setInt ( neighbor ) );		
-		}
-	}
+
 	return Adj;
 }
 /**
  * visita breadth_first_search su matrice di adiacenza
 */
 int *dijkstraHeap ( GRAPHOBJ *graph, int s, int target ) {
+	assert ( graph );	
 	/**
 	 * inizializzazioni
 	 */
@@ -144,7 +146,7 @@ int *dijkstraHeap ( GRAPHOBJ *graph, int s, int target ) {
 
 	//main loop
 	while ( frontier->heapsize > 1 ) {
-		//remove and return the best vertex
+		//estrazione del nodo con la distanza minore
 		tmp 	= extractFirst ( frontier );
 		u 		= getData ( tmp );
 		dist[u] = getKey ( tmp );
@@ -153,8 +155,10 @@ int *dijkstraHeap ( GRAPHOBJ *graph, int s, int target ) {
 		//debug
 		if ( PRINTALL ) graph->maze[getCoord ( graph, u )->y][getCoord ( graph, u )->x].path = true;
 		if ( u == target ) {
+		 	freeHeap ( frontier );
 			return pred;			
 		}
+		//analisi dei nodi adiacenti
 		while ( !isEmpty ( AdjList ) ) {
 			v = getInt ( getFront ( AdjList ) );
 			
@@ -165,8 +169,10 @@ int *dijkstraHeap ( GRAPHOBJ *graph, int s, int target ) {
 		}
 	}
 	free ( pred );
+ 	freeHeap ( frontier );
 	return NULL;
 }
+//funzione di rilassamento arco
 void relax ( GRAPHOBJ *graph, Heap *frontier, int u, int v, int *dist, int *pred) {
 	int alt;
 	alt = dist[u] + graph->getWeight ( graph, u, v );
@@ -181,12 +187,10 @@ void relax ( GRAPHOBJ *graph, Heap *frontier, int u, int v, int *dist, int *pred
 	}
 }
 
+//BFS
 int *breadth_first_search ( GRAPHOBJ *graph, int s, int target ) {
 
-	if ( !check ( graph, "breadth_first_search" ) ) return NULL;
-	if ( s >= graph->vNum ) {
-		return NULL;
-	}
+	assert ( graph );
 
 	int u;							//start node
 	int v;							//target
@@ -206,6 +210,7 @@ int *breadth_first_search ( GRAPHOBJ *graph, int s, int target ) {
 
 	frontier = enqueue ( frontier, setInt ( s ) );
 
+	//estrazione nodo dalla frontiera
 	while ( !isEmpty ( frontier ) ) {
 		u = getInt ( getFront ( frontier ) );
 		AdjList = graph->getAdjList ( graph, u );
@@ -213,6 +218,7 @@ int *breadth_first_search ( GRAPHOBJ *graph, int s, int target ) {
 		//debug
 		if ( PRINTALL ) graph->maze[getCoord ( graph, u )->y][getCoord ( graph, u )->x].path = true;
 
+		//inserimento degli adiacenti nella frontiera
 		while ( !isEmpty ( AdjList ) ) {
 			v = getInt ( getFront ( AdjList ) );
 			AdjList = dequeue ( AdjList );
@@ -233,21 +239,28 @@ int *breadth_first_search ( GRAPHOBJ *graph, int s, int target ) {
 	return NULL;
 }
 
+//funzione euristica per A*
 int heuristic ( GRAPHOBJ *graph, int s, int t ) {
+	assert ( graph );
+	int res;
 	VCOORD *	start 		= getCoord ( graph, s );
 	VCOORD *	target 		= getCoord ( graph, t );
-	/*manhattan*///return ( abs ( start->x - target->x ) + abs ( start->y - target->y ) );
-	/*euclidian*/return pow ( pow ( ( target->x - start->x ), 2 ) + pow ( ( target->y - start->y ), 2 ), 0.5 );
+	/*manhattan*///res = ( abs ( start->x - target->x ) + abs ( start->y - target->y ) );
+	/*euclidian*/res = pow ( pow ( ( target->x - start->x ), 2 ) + pow ( ( target->y - start->y ), 2 ), 0.5 );
+	free ( start );
+	free ( target );
+	return res;
 }
 
+//A*
 int *a_star ( GRAPHOBJ *graph, int s, int t ) {
-
+	assert ( graph );
 	int i, cost;
 	int current;
 	bool found 				= false;
-	void 	*	tmp;					//used to store Heap first element
-	Set 	*	AdjList		= NULL;		//Adjiacence list implemented as queue
-	Heap 	*	frontier	= NULL;		//Open set implemented as a Heap
+	void 	*	tmp;
+	Set 	*	AdjList		= NULL;		//lista di adiacenza ( coda )
+	Heap 	*	frontier	= NULL;		//Open set ( Heap )
 	frontier 				= initializeHeap ( minHeapify );
 	int 	*	pred		= ( int *) malloc ( graph->vNum * sizeof ( int ) );
 	int 	*	g			= ( int *) malloc ( graph->vNum * sizeof ( int ) );
@@ -260,6 +273,7 @@ int *a_star ( GRAPHOBJ *graph, int s, int t ) {
 	}
 	insert ( frontier, new_HeapData ( s, 0 ) );
 	g[s] 	= 0;
+	//estrazione del nodo con priorità minore dalla frontiera
 	while ( !isHeapEmpty ( frontier ) ) {
 		tmp 	= extractFirst ( frontier );
 		current = getData ( tmp );
@@ -267,9 +281,12 @@ int *a_star ( GRAPHOBJ *graph, int s, int t ) {
 		if ( PRINTALL ) graph->maze[getCoord ( graph, current )->y][getCoord ( graph, current )->x].path = true;
 
 		if ( current == t ) {
+			free ( g );
+			freeHeap ( frontier );		
 			return pred;
 		}
 		AdjList = graph->getAdjList ( graph, current );
+		//estrazione da lista di adiacenza
 		while ( !isEmpty ( AdjList ) ) {
 			int y = getInt ( getFront ( AdjList ) );
 			AdjList = dequeue ( AdjList );
@@ -281,7 +298,10 @@ int *a_star ( GRAPHOBJ *graph, int s, int t ) {
 				pred[y] = current;
 			}
 		}
+		free ( tmp );
  	}
  	free ( pred );
+ 	free ( g );
+ 	freeHeap ( frontier );
 	return NULL;
 }

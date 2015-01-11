@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <assert.h>
 #include <stdbool.h>
 #include "./headers/set.h"
 #include "./headers/structures.h"
@@ -43,9 +44,11 @@ void *setInt ( int i ) {
 	return Int;
 }
 
-int getInt ( void *i ) {
-	if ( i ) {
-		return * ( int * ) i;
+int getInt ( void *data ) {
+	if ( data ) {
+		int k = * ( int * ) data;
+		free ( data ); 
+		return k;
 	} else
 		return NIL;
 }
@@ -79,6 +82,7 @@ void *setCoord ( int x, int y ) {
  */
 Set *newSet ( void *data ) {
 	Set *set = ( Set * ) malloc ( sizeof ( Set ) );
+	assert ( set );
 	set->data = data;
 	set->next = NULL;
 	set->last = NULL;	
@@ -155,8 +159,7 @@ int stackVuoto (Set *st) {
 Set *push (Set *stack, void *data) {
 
     Set *temp = (Set *) malloc (sizeof (Set));
-    if ( !temp )
-        printf ("low memory"), exit (EXIT_FAILURE);
+    assert ( temp );
     temp->data = data;
     temp->next = stack;
 

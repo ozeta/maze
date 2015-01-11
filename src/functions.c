@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <assert.h>
 #include "./headers/functions.h"
 #include "./headers/lib.h"
 
@@ -51,6 +52,7 @@ GraphT matrixEdgeInizialize () {
 //return: nuovo puntatore a grafo di vertexNum vertici
 */
 GRAPHOBJ *buildGraph ( GRAPHOBJ *graphObj, int size ) {
+	assert ( graphObj );	
 	int i, j;
 	char msg[256];
 	GraphT **graph = NULL; 
@@ -75,7 +77,7 @@ GRAPHOBJ *buildGraph ( GRAPHOBJ *graphObj, int size ) {
 }
 
 void matrixInsertInterface ( GRAPHOBJ *graph ) {
-	if ( !check ( graph, "insert interface" ) )	return;
+	assert ( graph );
 	graph->matrix = appendOneVertexIntoGraph ( graph );
 }
 /**
@@ -83,7 +85,7 @@ void matrixInsertInterface ( GRAPHOBJ *graph ) {
 //return: nuovo puntatore ad graph di dimensione n+1
 */
 GraphT **appendOneVertexIntoGraph ( GRAPHOBJ *graph ) {
-
+	assert ( graph );
 	//aggiorno il numero di vertici
 	++graph->vNum;
 	char msg[256];
@@ -118,6 +120,7 @@ GraphT **appendOneVertexIntoGraph ( GRAPHOBJ *graph ) {
 }
 /*estrae il peso da un arco*/
 int getMatrixWeight ( GRAPHOBJ *graph, int x, int y ) {
+	assert ( graph );	
 	int weight = 0;
 
 	if ( graph && graph->matrix ) {
@@ -128,6 +131,7 @@ int getMatrixWeight ( GRAPHOBJ *graph, int x, int y ) {
 
 //procedura che modifica il peso di un arco
 void insertEdgeIntograph ( GRAPHOBJ *graph, int x, int y, int weight ) {
+	assert ( graph );	
 	if ( graph ) {
 			if ( x < graph->vNum && y < graph->vNum ) {
 				graph->matrix[x][y].weight = weight;
@@ -141,6 +145,7 @@ void insertEdgeIntograph ( GRAPHOBJ *graph, int x, int y, int weight ) {
 
 //elimina arco nel grafo
 void deleteEdgeFromgraph ( GRAPHOBJ *graph, int x, int y ) {
+	assert ( graph );	
 	if ( graph ) {
 		if ( x < graph->vNum && y < graph->vNum )
 			graph->matrix[x][y].weight = 0;
@@ -149,6 +154,8 @@ void deleteEdgeFromgraph ( GRAPHOBJ *graph, int x, int y ) {
 	}
 }
 void FillGraph ( GRAPHOBJ *graph, insDEF insertMethod, int inf, int sup) {
+	assert ( graph );
+	assert ( insertMethod );	
 	if ( !check ( graph , "FillGraph" ) ) {
 		return;
 	}	
@@ -166,6 +173,7 @@ void FillGraph ( GRAPHOBJ *graph, insDEF insertMethod, int inf, int sup) {
 *IMPLICIT GRID MAZE SECTION
 ************************************/
 VCOORD *getCoord ( GRAPHOBJ *graph, int u ) {
+	assert ( graph );	
 	VCOORD *vCoord = ( VCOORD * ) malloc ( sizeof ( VCOORD ) );
 	int x = u % graph->width;
 	int y = u / graph->width;
@@ -185,7 +193,7 @@ int coordToID ( GRAPHOBJ *graph, VCOORD *c ) {
 stampa del cammino minimo
 */
 Set *printPath ( GRAPHOBJ *graph, int s , int v, int *pred, Set *succ, FILE *stream ) {
-
+	assert ( graph );
     if (v == s) {
  		if ( stream )
  			fprintf ( stream, "s: %d\n", s  );
@@ -205,7 +213,7 @@ Set *printPath ( GRAPHOBJ *graph, int s , int v, int *pred, Set *succ, FILE *str
     return succ;
 }
 Set *explicitPrintPath ( GRAPHOBJ *graph, int s , int v, int *pred, Set *succ, FILE *stream ) {
-
+	assert ( graph );
     if (v == s) {
  		if ( stream )
  			fprintf ( stream, "s: %d\n", s  );
@@ -225,6 +233,7 @@ Set *explicitPrintPath ( GRAPHOBJ *graph, int s , int v, int *pred, Set *succ, F
 cammino minimo
 */
 void printAllpreds ( GRAPHOBJ *graph, int *pred ) {
+	assert ( graph );	
 	int i,j;
 	for ( i = 0; i < graph->height; i++ ) {
 		for ( j = 0; j < graph->width; j++ ) {
@@ -240,7 +249,7 @@ void printAllpreds ( GRAPHOBJ *graph, int *pred ) {
 	printf ( "\n" );
 }
 Set *minPath ( GRAPHOBJ *graph, int s, int v ) {
-
+	assert ( graph );
 	int 		*	pred 	= NULL;
 	Set 		*	succ 	= NULL;
 	Set 		*	def 	= NULL;
@@ -265,6 +274,7 @@ Set *minPath ( GRAPHOBJ *graph, int s, int v ) {
 	return succ;
 }
 Set *getAdjList ( GRAPHOBJ *graph, int u ) {
+	assert ( graph );	
 	Set *res = NULL;
 	int weight;
 	int i;
@@ -277,7 +287,7 @@ Set *getAdjList ( GRAPHOBJ *graph, int u ) {
 	return res;
 }
 void cPrintMaze ( GRAPHOBJ *graph, Set * succ, int s, int v ) {
-
+	assert ( graph );
 	int i, j, k;
 	VCOORD *cur;
 
@@ -312,6 +322,7 @@ void cPrintMaze ( GRAPHOBJ *graph, Set * succ, int s, int v ) {
 
 
 void printAdj ( GRAPHOBJ *graph, int u, Set *Adj, FILE *stream ) {
+	assert ( graph );
 	char *s ="-------------------";
 	if ( Adj ) {
 		fprintf ( stream, "nodo %3d:\n", u );
@@ -323,6 +334,7 @@ void printAdj ( GRAPHOBJ *graph, int u, Set *Adj, FILE *stream ) {
 	}
 }
 void printDist ( GRAPHOBJ *graph, FILE *stream, int *dist ) {
+	assert ( graph );	
 	fprintf ( stream, "distanze:\n\n");
 	int k;
 	for ( k = 0; k < graph->vNum; k++ ) {
@@ -331,7 +343,9 @@ void printDist ( GRAPHOBJ *graph, FILE *stream, int *dist ) {
 	fprintf ( stream, "\n\n" );	
 }
 
-GRAPHOBJ *buildExplicitGraph ( GRAPHOBJ *graph, GRAPHOBJ *newGraph, char *mazeStr ) {
+GRAPHOBJ *convertToExplicitMap ( GRAPHOBJ *graph, GRAPHOBJ *newGraph, char *mazeStr ) {
+	assert ( graph );
+	assert ( newGraph );	
 	bool DEBUG 			= false;
 	int width 			= graph->width;
 	int height 			= graph->height;
@@ -377,7 +391,8 @@ GRAPHOBJ *buildExplicitGraph ( GRAPHOBJ *graph, GRAPHOBJ *newGraph, char *mazeSt
 	return newGraph;
 }
 VCOORD **buildMap ( GRAPHOBJ * graph, char *mazeStr ) {
-
+	assert ( graph );
+	assert ( mazeStr );	
 	int width 		= graph->width;
 	int height 		= graph->height;
 	int size 		= width * height;

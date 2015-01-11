@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <assert.h>
 #include "./headers/heap.h"
 #include "./headers/structures.h"
 #include "./headers/set.h"
@@ -56,7 +57,11 @@ Heap *initializeHeap ( heapDEF heapify ) {
 	return H;
 }
 
-
+void freeHeap ( Heap *H ) {
+	int i = 2;
+	free ( H->A );
+	free ( H );
+}
 
 //crea una struttura Data.
 //insert: callback del metodo di insermento
@@ -76,7 +81,7 @@ Data *new_HeapData ( int data, int key ) {
 //riallocazione dello heap array
 //la dimensione dell'array viene raddoppiata
 void * heap_realloc ( Heap * H ) {
-
+	assert ( H );
 	H->A = ( Data ** ) realloc ( H->A, 2 * H->arraysize * sizeof ( Data * ) );
 	if ( !check ( H->A, "heap->realloc" ) )
 		return NULL;
@@ -86,6 +91,7 @@ void * heap_realloc ( Heap * H ) {
 
 //controlla se l'array è pieno
 int isHeapFull ( Heap * H ) {
+	assert ( H );	
 	if ( H->heapsize == H->arraysize )
 		return 1;
 	else
@@ -97,6 +103,7 @@ int isHeapFull ( Heap * H ) {
 //l'oggetto deve essere di tipo Data
 //void insert ( Heap *H, void *data )
 void insert ( Heap *H, Data *data ) {
+	assert ( H );	
 	if ( isHeapFull ( H ) ) {
 		if ( !( H->A = ( Data ** ) heap_realloc ( H ) ) ) {
 			printf ("\n\nmemoria esaurita\n\n");
@@ -156,7 +163,6 @@ void *getLast ( Heap *H ) {
 
 //estrae il primo elemento  dallo Heap
 Data * extractFirst ( Heap *H ) {
-
 	Data * tmp;
 	if ( !check ( H, "extractFirst, H" ) )
 		return NULL;
@@ -177,6 +183,7 @@ Data * extractFirst ( Heap *H ) {
 
 //aumenta/diminuisce il valore value dell'elemento nella posizione i dello heap
 void updateKey ( Heap *H, int i, int value )  {
+	assert ( H );	
 	if ( value < H->A[i]->key ) {
 		decreaseKey ( H, i, value );
 	} else {
@@ -185,7 +192,7 @@ void updateKey ( Heap *H, int i, int value )  {
 }
 //decrementa l'elemento in cui data = i
 void decreaseKey ( Heap *H, int i, int value ) {
-
+	assert ( H );
 	int k  = 1;
 	while ( k < H->heapsize && H->A[k]->data != i ) {
 		k++;
@@ -198,7 +205,7 @@ void decreaseKey ( Heap *H, int i, int value ) {
 }
 //cancella dallo heap
 void removeItemI ( Heap *H, int i ) {
-
+	assert ( H );
 	if ( H->heapsize < 1 ) {
 		printf ("\nheap underflow\n");
 	} else {
@@ -221,7 +228,7 @@ void removeItemI ( Heap *H, int i ) {
 /*
 */
 void increaseKey ( Heap *H, int i, int value ) {
-
+	assert ( H );
 	if ( value < H->A[i]->key ) {
 		printf ("\n\nErrore: nuova chiave più piccola\n\n");
 	} else {
@@ -237,7 +244,8 @@ void increaseKey ( Heap *H, int i, int value ) {
 
 //scambia 2 oggetti
 void swap ( void *a, void *b, size_t size ) {
-
+		assert ( a );
+		assert ( b );
 		void *c = malloc ( size );
 		memcpy ( c, a, size );
 		memcpy ( a, b, size );
@@ -246,7 +254,7 @@ void swap ( void *a, void *b, size_t size ) {
 }
  
 void minHeapify ( Heap *H, int i ) {
-
+	assert ( H );
 	int l = left ( i );
 	int r = right ( i );
 	int max;
@@ -265,7 +273,7 @@ void minHeapify ( Heap *H, int i ) {
 	}
 }
 void maxHeapify ( Heap *H, int i ) {
-
+	assert ( H );
 	int l = left ( i );
 	int r = right ( i );
 	int max;
@@ -286,7 +294,7 @@ void maxHeapify ( Heap *H, int i ) {
 
 //costruisce lo heap a partire da un array disordinato
 void buildHeap ( Heap *H ) {
-
+	assert ( H );
 	int i = floor ( ( H->heapsize ) / 2 );
 	for ( ; i > 0; i-- ) {
 		H->heapify ( H, i );
@@ -295,7 +303,7 @@ void buildHeap ( Heap *H ) {
 
 //cancella dallo heap
 void removeItem ( Heap *H, int i ) {
-
+	assert ( H );
 	if ( H->heapsize < 1 ) {
 		printf ("\nheap underflow\n");
 	} else {
@@ -321,7 +329,7 @@ int getKey ( Data *data ) {
 }
 
 bool isHeapEmpty ( Heap *H ) {
-
+	assert ( H );
 	if ( H->heapsize > 1 ) {
 		return false;
 	}
@@ -331,7 +339,7 @@ bool isHeapEmpty ( Heap *H ) {
 }
 
 bool heapIntSearch ( Heap *H , int test ) {
-
+	assert ( H );
 	int size = H->heapsize -1;
 	bool result = false;
 	while ( size > 0 && !result ) {

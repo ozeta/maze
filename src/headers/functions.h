@@ -36,7 +36,7 @@ Set 	*	getAdjList ( GRAPHOBJ *graph, int u );
 VCOORD	*	getCoord ( GRAPHOBJ *graph, int u );
 int 		coordToID ( GRAPHOBJ *graph, VCOORD *c );
 VCOORD	**	buildMap ( GRAPHOBJ * graph, char *mazeStr );
-GRAPHOBJ * 	buildExplicitGraph ( GRAPHOBJ *graph, GRAPHOBJ *newGraph, char *mazeStr );
+GRAPHOBJ * 	convertToExplicitMap( GRAPHOBJ *graph, GRAPHOBJ *newGraph, char *mazeStr );
 Set 	*	explicitPrintPath ( GRAPHOBJ *graph, int s , int v, int *pred, Set *succ, FILE *stream );
 Set 	*	printPath ( GRAPHOBJ *graph, int s , int v, int *pred, Set *succ, FILE *stream );
 Set 	*	minPath ( GRAPHOBJ *graph, int s, int v );
